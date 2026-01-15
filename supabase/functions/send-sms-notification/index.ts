@@ -1,0 +1,185 @@
+import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers":
+    "authorization, x-client-info, apikey, content-type",
+};
+
+interface SmsRequest {
+  behaviorScoreId: string;
+  studentId: string;
+  score: number;
+  date: string;
+}
+
+const handler = async (req: Request): Promise<Response> => {
+  // Handle CORS preflight requests
+  if (req.method === "OPTIONS") {
+    return new Response(null, { headers: corsHeaders });
+  }
+
+  try {
+    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+    const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+    const twilioAccountSid = Deno.env.get("TWILIO_ACCOUNT_SID");
+    const twilioAuthToken = Deno.env.get("TWILIO_AUTH_TOKEN");
+    const twilioPhoneNumber = Deno.env.get("TWILIO_PHONE_NUMBER");
+    
+    // Or Africa's Talking
+    const atApiKey = Deno.env.get("AFRICASTALKING_API_KEY");
+    const atUsername = Deno.env.get("AFRICASTALKING_USERNAME");
+
+    const supabase = createClient(supabaseUrl, supabaseServiceKey);
+
+    const { behaviorScoreId, studentId, score, date }: SmsRequest = await req.json();
+
+    // Get student details
+    const { data: student } = await supabase
+      .from("students")
+      .select("first_name, last_name, class:classes(name)")
+      .eq("id", studentId)
+      .single();
+
+    if (!student) {
+      throw new Error("Student not found");
+    }
+
+    // Get primary contact parents
+    const { data: parentLinks } = await supabase
+      .from("student_parents")
+      .select("parent:parents(*)")
+      .eq("student_id", studentId)
+      .eq("is_primary_contact", true);
+
+    if (!parentLinks || parentLinks.length === 0) {
+      console.log("No primary contact parent found for student");
+      return new Response(
+        JSON.stringify({ message: "No primary contact parent found" }),
+        {
+          status: 200,
+          headers: { "Content-Type": "application/json", ...corsHeaders },
+        }
+      );
+    }
+
+    const results = [];
+
+    for (const link of parentLinks) {
+      const parent = link.parent as any;
+      if (!parent || !parent.phone) continue;
+
+      const message = `Dear Parent, the behavior score for your child ${student.first_name} ${student.last_name} has been updated to ${score} on ${date}. Thank you.`;
+
+      let smsStatus = "pending";
+      let errorMessage = null;
+
+      // Try to send SMS via Twilio
+      if (twilioAccountSid && twilioAuthToken && twilioPhoneNumber) {
+        try {
+          const twilioResponse = await fetch(
+            `https://api.twilio.com/2010-04-01/Accounts/${twilioAccountSid}/Messages.json`,
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/x-www-form-urlencoded",
+                Authorization: `Basic ${btoa(`${twilioAccountSid}:${twilioAuthToken}`)}`,
+              },
+              body: new URLSearchParams({
+                To: parent.phone,
+                From: twilioPhoneNumber,
+                Body: message,
+              }),
+            }
+          );
+
+          if (twilioResponse.ok) {
+            smsStatus = "sent";
+            console.log(`SMS sent to ${parent.phone} via Twilio`);
+          } else {
+            const errorData = await twilioResponse.json();
+            errorMessage = errorData.message || "Twilio error";
+            smsStatus = "failed";
+          }
+        } catch (e: any) {
+          errorMessage = e.message;
+          smsStatus = "failed";
+        }
+      }
+      // Try Africa's Talking
+      else if (atApiKey && atUsername) {
+        try {
+          const atResponse = await fetch(
+            "https://api.africastalking.com/version1/messaging",
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/x-www-form-urlencoded",
+                apiKey: atApiKey,
+                Accept: "application/json",
+              },
+              body: new URLSearchParams({
+                username: atUsername,
+                to: parent.phone,
+                message: message,
+              }),
+            }
+          );
+
+          if (atResponse.ok) {
+            smsStatus = "sent";
+            console.log(`SMS sent to ${parent.phone} via Africa's Talking`);
+          } else {
+            const errorData = await atResponse.json();
+            errorMessage = JSON.stringify(errorData);
+            smsStatus = "failed";
+          }
+        } catch (e: any) {
+          errorMessage = e.message;
+          smsStatus = "failed";
+        }
+      } else {
+        // No SMS provider configured - log the notification
+        console.log(`SMS notification queued (no provider configured): ${message}`);
+        smsStatus = "pending";
+        errorMessage = "No SMS provider configured";
+      }
+
+      // Update or create SMS notification record
+      const { error: updateError } = await supabase
+        .from("sms_notifications")
+        .update({
+          status: smsStatus,
+          sent_at: smsStatus === "sent" ? new Date().toISOString() : null,
+          error_message: errorMessage,
+        })
+        .eq("behavior_score_id", behaviorScoreId)
+        .eq("parent_id", parent.id);
+
+      if (updateError) {
+        console.error("Error updating SMS notification:", updateError);
+      }
+
+      results.push({
+        parentId: parent.id,
+        phone: parent.phone,
+        status: smsStatus,
+        error: errorMessage,
+      });
+    }
+
+    return new Response(JSON.stringify({ success: true, results }), {
+      status: 200,
+      headers: { "Content-Type": "application/json", ...corsHeaders },
+    });
+  } catch (error: any) {
+    console.error("Error in send-sms-notification function:", error);
+    return new Response(JSON.stringify({ error: error.message }), {
+      status: 500,
+      headers: { "Content-Type": "application/json", ...corsHeaders },
+    });
+  }
+};
+
+serve(handler);
