@@ -66,7 +66,7 @@ export default function Scores() {
       const [scoresRes, studentsRes] = await Promise.all([
         supabase
           .from('behavior_scores')
-          .select('*, student:students(*, class:classes(*)), teacher:profiles!behavior_scores_teacher_id_fkey(*)')
+          .select('*, student:students(*, class:classes(*)), teacher:profiles(*)') 
           .order('created_at', { ascending: false }),
         supabase.from('students').select('*, class:classes(*)').order('last_name'),
       ]);
