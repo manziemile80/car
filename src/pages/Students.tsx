@@ -19,13 +19,19 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { supabase } from '@/integrations/supabase/client';
-import { Student, Class } from '@/types/database';
-import { Plus, Search, GraduationCap, Loader2 } from 'lucide-react';
+import { Student, Class, Parent, StudentParent } from '@/types/database';
+import { Plus, Search, GraduationCap, Loader2, Users } from 'lucide-react';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
+import { LinkParentsDialog } from '@/components/students/LinkParentsDialog';
+
+interface LinkedParent extends StudentParent {
+  parent?: Parent;
+}
 
 interface StudentWithClass extends Student {
   class?: Class | null;
+  student_parents?: LinkedParent[];
 }
 
 export default function Students() {
@@ -35,6 +41,10 @@ export default function Students() {
   const [searchQuery, setSearchQuery] = useState('');
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [formLoading, setFormLoading] = useState(false);
+  
+  // Link parents dialog state
+  const [linkDialogOpen, setLinkDialogOpen] = useState(false);
+  const [selectedStudent, setSelectedStudent] = useState<StudentWithClass | null>(null);
   
   // Form state
   const [firstName, setFirstName] = useState('');
@@ -50,7 +60,10 @@ export default function Students() {
   const fetchData = async () => {
     try {
       const [studentsRes, classesRes] = await Promise.all([
-        supabase.from('students').select('*, class:classes(*)').order('last_name'),
+        supabase
+          .from('students')
+          .select('*, class:classes(*), student_parents(*, parent:parents(*))')
+          .order('last_name'),
         supabase.from('classes').select('*').order('name'),
       ]);
 
@@ -66,6 +79,11 @@ export default function Students() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleOpenLinkDialog = (student: StudentWithClass) => {
+    setSelectedStudent(student);
+    setLinkDialogOpen(true);
   };
 
   const handleAddStudent = async (e: React.FormEvent) => {
@@ -278,11 +296,37 @@ export default function Students() {
                         {format(new Date(student.enrollment_date), 'MMM d, yyyy')}
                       </span>
                     </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-muted-foreground">Parents</span>
+                      <span className="font-medium">
+                        {student.student_parents?.length || 0} linked
+                      </span>
+                    </div>
                   </div>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="w-full mt-4"
+                    onClick={() => handleOpenLinkDialog(student)}
+                  >
+                    <Users className="h-4 w-4" />
+                    Link Parents
+                  </Button>
                 </CardContent>
               </Card>
             ))}
           </div>
+        )}
+
+        {/* Link Parents Dialog */}
+        {selectedStudent && (
+          <LinkParentsDialog
+            studentId={selectedStudent.id}
+            studentName={`${selectedStudent.first_name} ${selectedStudent.last_name}`}
+            open={linkDialogOpen}
+            onOpenChange={setLinkDialogOpen}
+            onUpdate={fetchData}
+          />
         )}
       </div>
     </DashboardLayout>
