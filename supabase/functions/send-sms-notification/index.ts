@@ -27,13 +27,18 @@ const handler = async (req: Request): Promise<Response> => {
     const twilioAuthToken = Deno.env.get("TWILIO_AUTH_TOKEN");
     const twilioPhoneNumber = Deno.env.get("TWILIO_PHONE_NUMBER");
     
-    // Or Africa's Talking
+    // Africa's Talking
     const atApiKey = Deno.env.get("AFRICASTALKING_API_KEY");
     const atUsername = Deno.env.get("AFRICASTALKING_USERNAME");
+
+    console.log("SMS Notification function called");
+    console.log(`Africa's Talking configured: ${!!atApiKey && !!atUsername}`);
+    console.log(`Twilio configured: ${!!twilioAccountSid && !!twilioAuthToken}`);
 
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
     const { behaviorScoreId, studentId, score, date }: SmsRequest = await req.json();
+    console.log(`Processing SMS for student: ${studentId}, score: ${score}`);
 
     // Get student details
     const { data: student } = await supabase
@@ -45,6 +50,8 @@ const handler = async (req: Request): Promise<Response> => {
     if (!student) {
       throw new Error("Student not found");
     }
+
+    console.log(`Student found: ${student.first_name} ${student.last_name}`);
 
     // Get primary contact parents
     const { data: parentLinks } = await supabase
@@ -64,16 +71,23 @@ const handler = async (req: Request): Promise<Response> => {
       );
     }
 
+    console.log(`Found ${parentLinks.length} primary contact parent(s)`);
+
     const results = [];
 
     for (const link of parentLinks) {
       const parent = link.parent as any;
-      if (!parent || !parent.phone) continue;
+      if (!parent || !parent.phone) {
+        console.log("Parent has no phone number, skipping");
+        continue;
+      }
 
       const message = `Dear Parent, the behavior score for your child ${student.first_name} ${student.last_name} has been updated to ${score} on ${date}. Thank you.`;
 
       let smsStatus = "pending";
       let errorMessage = null;
+
+      console.log(`Preparing to send SMS to ${parent.phone}`);
 
       // Try to send SMS via Twilio
       if (twilioAccountSid && twilioAuthToken && twilioPhoneNumber) {
@@ -110,14 +124,17 @@ const handler = async (req: Request): Promise<Response> => {
       // Try Africa's Talking
       else if (atApiKey && atUsername) {
         try {
+          console.log(`Sending SMS to ${parent.phone} via Africa's Talking`);
+          console.log(`Using username: ${atUsername}`);
+          
           const atResponse = await fetch(
             "https://api.africastalking.com/version1/messaging",
             {
               method: "POST",
               headers: {
                 "Content-Type": "application/x-www-form-urlencoded",
-                apiKey: atApiKey,
-                Accept: "application/json",
+                "apiKey": atApiKey,
+                "Accept": "application/json",
               },
               body: new URLSearchParams({
                 username: atUsername,
@@ -127,15 +144,34 @@ const handler = async (req: Request): Promise<Response> => {
             }
           );
 
+          const responseText = await atResponse.text();
+          console.log(`Africa's Talking response status: ${atResponse.status}`);
+          console.log(`Africa's Talking response: ${responseText}`);
+
           if (atResponse.ok) {
-            smsStatus = "sent";
-            console.log(`SMS sent to ${parent.phone} via Africa's Talking`);
+            try {
+              const responseData = JSON.parse(responseText);
+              // Check if the SMS was actually sent successfully
+              if (responseData.SMSMessageData?.Recipients?.[0]?.status === "Success") {
+                smsStatus = "sent";
+                console.log(`SMS sent successfully to ${parent.phone}`);
+              } else if (responseData.SMSMessageData?.Recipients?.[0]?.status) {
+                smsStatus = "failed";
+                errorMessage = responseData.SMSMessageData.Recipients[0].status;
+              } else {
+                smsStatus = "sent";
+                console.log(`SMS queued for ${parent.phone}`);
+              }
+            } catch {
+              // Response wasn't JSON but was successful
+              smsStatus = "sent";
+            }
           } else {
-            const errorData = await atResponse.json();
-            errorMessage = JSON.stringify(errorData);
+            errorMessage = responseText;
             smsStatus = "failed";
           }
         } catch (e: any) {
+          console.error(`Africa's Talking error: ${e.message}`);
           errorMessage = e.message;
           smsStatus = "failed";
         }
