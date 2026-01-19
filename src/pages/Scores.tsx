@@ -23,7 +23,7 @@ import {
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { Student, Class, BehaviorCategory, BehaviorScoreWithDetails } from '@/types/database';
-import { Plus, Search, ClipboardList, Loader2, Bell } from 'lucide-react';
+import { Plus, Search, ClipboardList, Loader2, Bell, Send } from 'lucide-react';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { ScoreBadge } from '@/components/dashboard/ScoreBadge';
@@ -49,6 +49,7 @@ export default function Scores() {
   const [searchQuery, setSearchQuery] = useState('');
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [formLoading, setFormLoading] = useState(false);
+  const [testSmsLoading, setTestSmsLoading] = useState(false);
   
   // Form state
   const [selectedStudent, setSelectedStudent] = useState('');
@@ -169,6 +170,47 @@ export default function Scores() {
     setScoreDate(format(new Date(), 'yyyy-MM-dd'));
   };
 
+  const handleTestSms = async () => {
+    setTestSmsLoading(true);
+    try {
+      // Use Eric NIGABA who has a linked parent
+      const testStudentId = '688cb156-6dfb-477a-92da-c5fc763d671d';
+      const testScore = 85;
+      const testDate = format(new Date(), 'yyyy-MM-dd');
+
+      // Call the edge function directly for testing
+      const response = await supabase.functions.invoke('send-sms-notification', {
+        body: {
+          behaviorScoreId: 'test-' + Date.now(),
+          studentId: testStudentId,
+          score: testScore,
+          date: testDate,
+        },
+      });
+
+      if (response.error) {
+        throw new Error(response.error.message);
+      }
+
+      console.log('Test SMS response:', response.data);
+      
+      if (response.data?.success) {
+        toast.success('Test SMS sent successfully!', {
+          description: `Sent to ${response.data.results?.length || 0} parent(s)`,
+        });
+      } else {
+        toast.warning('SMS test completed', {
+          description: response.data?.message || 'Check console for details',
+        });
+      }
+    } catch (error: any) {
+      console.error('Test SMS error:', error);
+      toast.error('Test SMS failed', { description: error.message });
+    } finally {
+      setTestSmsLoading(false);
+    }
+  };
+
   const filteredScores = scores.filter((s) => {
     if (!s.student) return false;
     const fullName = `${s.student.first_name} ${s.student.last_name}`.toLowerCase();
@@ -193,13 +235,22 @@ export default function Scores() {
               Record and manage student behavior assessments
             </p>
           </div>
-          <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
-            <DialogTrigger asChild>
-              <Button>
-                <Plus className="h-4 w-4" />
-                Record Score
-              </Button>
-            </DialogTrigger>
+          <div className="flex gap-2">
+            <Button variant="outline" onClick={handleTestSms} disabled={testSmsLoading}>
+              {testSmsLoading ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <Send className="h-4 w-4" />
+              )}
+              Test SMS
+            </Button>
+            <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
+              <DialogTrigger asChild>
+                <Button>
+                  <Plus className="h-4 w-4" />
+                  Record Score
+                </Button>
+              </DialogTrigger>
             <DialogContent className="sm:max-w-lg">
               <DialogHeader>
                 <DialogTitle>Record Behavior Score</DialogTitle>
@@ -303,6 +354,7 @@ export default function Scores() {
               </form>
             </DialogContent>
           </Dialog>
+          </div>
         </div>
 
         {/* Search */}
