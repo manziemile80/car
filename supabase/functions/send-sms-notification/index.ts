@@ -127,8 +127,13 @@ const handler = async (req: Request): Promise<Response> => {
           console.log(`Sending SMS to ${parent.phone} via Africa's Talking`);
           console.log(`Using username: ${atUsername}`);
           
+          // Use sandbox URL if username is 'sandbox', otherwise use live URL
+          const atBaseUrl = atUsername === 'sandbox' 
+            ? 'https://api.sandbox.africastalking.com' 
+            : 'https://api.africastalking.com';
+          
           const atResponse = await fetch(
-            "https://api.africastalking.com/version1/messaging",
+            `${atBaseUrl}/version1/messaging`,
             {
               method: "POST",
               headers: {
