@@ -130,38 +130,21 @@ export default function Scores() {
   };
 
   const sendSmsNotification = async (scoreId: string, studentId: string, scoreValue: number, date: string) => {
-    // Get student and parent info
-    const { data: studentData } = await supabase
-      .from('students')
-      .select('first_name, last_name, class:classes(name)')
-      .eq('id', studentId)
-      .single();
+    // Call the edge function to send SMS and update notification records
+    const response = await supabase.functions.invoke('send-sms-notification', {
+      body: {
+        behaviorScoreId: scoreId,
+        studentId: studentId,
+        score: scoreValue,
+        date: date,
+      },
+    });
 
-    if (!studentData) return;
-
-    const { data: parentLinks } = await supabase
-      .from('student_parents')
-      .select('parent:parents(*)')
-      .eq('student_id', studentId)
-      .eq('is_primary_contact', true);
-
-    if (!parentLinks || parentLinks.length === 0) return;
-
-    for (const link of parentLinks) {
-      const parent = link.parent as any;
-      if (!parent) continue;
-
-      const message = `Dear Parent, the behavior score for your child ${studentData.first_name} ${studentData.last_name} has been updated to ${scoreValue} on ${format(new Date(date), 'MMM d, yyyy')}. Thank you.`;
-
-      // Log the notification (actual SMS sending would be done via edge function)
-      await supabase.from('sms_notifications').insert({
-        behavior_score_id: scoreId,
-        parent_id: parent.id,
-        phone_number: parent.phone,
-        message,
-        status: 'pending',
-      });
+    if (response.error) {
+      throw new Error(response.error.message);
     }
+
+    console.log('SMS notification response:', response.data);
   };
 
   const resetForm = () => {
