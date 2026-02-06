@@ -23,11 +23,11 @@ import {
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { Student, Class, BehaviorCategory, BehaviorScoreWithDetails } from '@/types/database';
-import { Plus, Search, ClipboardList, Loader2, Bell, Send } from 'lucide-react';
+import { Plus, Search, ClipboardList, Loader2, Bell, Send, Eye } from 'lucide-react';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { ScoreBadge } from '@/components/dashboard/ScoreBadge';
-
+import { ScoreDetailsDialog } from '@/components/scores/ScoreDetailsDialog';
 interface StudentWithClass extends Student {
   class?: Class | null;
 }
@@ -50,6 +50,8 @@ export default function Scores() {
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [formLoading, setFormLoading] = useState(false);
   const [testSmsLoading, setTestSmsLoading] = useState(false);
+  const [selectedScore, setSelectedScore] = useState<BehaviorScoreWithDetails | null>(null);
+  const [detailsDialogOpen, setDetailsDialogOpen] = useState(false);
   
   // Form state
   const [selectedStudent, setSelectedStudent] = useState('');
@@ -403,6 +405,9 @@ export default function Scores() {
                   <th className="px-4 py-3 text-left text-sm font-semibold text-muted-foreground">
                     Teacher
                   </th>
+                  <th className="px-4 py-3 text-center text-sm font-semibold text-muted-foreground">
+                    Details
+                  </th>
                 </tr>
               </thead>
               <tbody>
@@ -432,12 +437,30 @@ export default function Scores() {
                     <td className="px-4 py-4 text-sm text-muted-foreground">
                       {score.teacher?.full_name || 'Unknown'}
                     </td>
+                    <td className="px-4 py-4 text-center">
+                      <button
+                        onClick={() => {
+                          setSelectedScore(score);
+                          setDetailsDialogOpen(true);
+                        }}
+                        className="inline-flex items-center justify-center rounded-md p-2 text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
+                      >
+                        <Eye className="h-4 w-4" />
+                      </button>
+                    </td>
                   </tr>
                 ))}
               </tbody>
             </table>
           </div>
         )}
+
+        {/* Score Details Dialog */}
+        <ScoreDetailsDialog
+          score={selectedScore}
+          open={detailsDialogOpen}
+          onOpenChange={setDetailsDialogOpen}
+        />
       </div>
     </DashboardLayout>
   );
