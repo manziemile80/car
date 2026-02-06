@@ -187,19 +187,21 @@ const handler = async (req: Request): Promise<Response> => {
         errorMessage = "No SMS provider configured";
       }
 
-      // Update or create SMS notification record
-      const { error: updateError } = await supabase
+      // Create SMS notification record
+      const { error: insertError } = await supabase
         .from("sms_notifications")
-        .update({
+        .insert({
+          behavior_score_id: behaviorScoreId,
+          parent_id: parent.id,
+          phone_number: parent.phone,
+          message: message,
           status: smsStatus,
           sent_at: smsStatus === "sent" ? new Date().toISOString() : null,
           error_message: errorMessage,
-        })
-        .eq("behavior_score_id", behaviorScoreId)
-        .eq("parent_id", parent.id);
+        });
 
-      if (updateError) {
-        console.error("Error updating SMS notification:", updateError);
+      if (insertError) {
+        console.error("Error inserting SMS notification:", insertError);
       }
 
       results.push({
