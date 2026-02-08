@@ -1,1 +1,7 @@
 project_id = "hhivbksgytwaypgqulkm"
+
+[functions.send-sms-notification]
+verify_jwt = false
+
+[functions.retry-failed-sms]
+verify_jwt = false
