@@ -204,6 +204,30 @@ const handler = async (req: Request): Promise<Response> => {
         console.error("Error inserting SMS notification:", insertError);
       }
 
+      // If SMS failed, try to send email as backup
+      if (smsStatus === "failed" && parent.email) {
+        console.log(`SMS failed, attempting email backup to ${parent.email}`);
+        try {
+          const emailResponse = await supabase.functions.invoke("send-email-notification", {
+            body: {
+              behaviorScoreId: behaviorScoreId,
+              studentId: studentId,
+              score: score,
+              date: date,
+              isSmsBackup: true,
+            },
+          });
+          
+          if (emailResponse.error) {
+            console.error("Email backup also failed:", emailResponse.error);
+          } else {
+            console.log("Email backup sent successfully");
+          }
+        } catch (emailErr: any) {
+          console.error("Error calling email backup:", emailErr.message);
+        }
+      }
+
       results.push({
         parentId: parent.id,
         phone: parent.phone,
