@@ -70,6 +70,13 @@ const handler = async (req: Request): Promise<Response> => {
 
     console.log(`Found ${parentLinks.length} primary contact parent(s)`);
 
+    // Determine "from" address - use verified domain if available
+    const fromDomain = Deno.env.get("RESEND_FROM_DOMAIN");
+    const fromAddress = fromDomain 
+      ? `Behavior Tracker <notifications@${fromDomain}>`
+      : "Behavior Tracker <onboarding@resend.dev>";
+    console.log(`Sending from: ${fromAddress}`);
+
     const results = [];
 
     for (const link of parentLinks) {
@@ -103,31 +110,54 @@ const handler = async (req: Request): Promise<Response> => {
 
       console.log(`Sending email to ${parent.email}`);
 
+      let emailStatus = "pending";
+      let errorMessage = null;
+      let resendMessageId = null;
+
       try {
         const emailResponse = await resend.emails.send({
-          from: "Behavior Tracker <onboarding@resend.dev>",
+          from: fromAddress,
           to: [parent.email],
           subject: subject,
           html: htmlContent,
         });
 
         console.log(`Email sent successfully to ${parent.email}:`, emailResponse);
-
-        results.push({
-          parentId: parent.id,
-          email: parent.email,
-          status: "sent",
-          messageId: emailResponse.data?.id,
-        });
+        emailStatus = "sent";
+        resendMessageId = emailResponse.data?.id || null;
       } catch (emailError: any) {
         console.error(`Failed to send email to ${parent.email}:`, emailError);
-        results.push({
-          parentId: parent.id,
-          email: parent.email,
-          status: "failed",
-          error: emailError.message,
-        });
+        emailStatus = "failed";
+        errorMessage = emailError.message;
       }
+
+      // Log to email_notifications table
+      const { error: insertError } = await supabase
+        .from("email_notifications")
+        .insert({
+          behavior_score_id: behaviorScoreId,
+          parent_id: parent.id,
+          email_address: parent.email,
+          subject: subject,
+          message: htmlContent,
+          status: emailStatus,
+          sent_at: emailStatus === "sent" ? new Date().toISOString() : null,
+          error_message: errorMessage,
+          is_sms_backup: isSmsBackup || false,
+          resend_message_id: resendMessageId,
+        });
+
+      if (insertError) {
+        console.error("Error logging email notification:", insertError);
+      }
+
+      results.push({
+        parentId: parent.id,
+        email: parent.email,
+        status: emailStatus,
+        messageId: resendMessageId,
+        error: errorMessage,
+      });
     }
 
     return new Response(
