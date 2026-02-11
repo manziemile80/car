@@ -95,6 +95,66 @@ export type Database = {
         }
         Relationships: []
       }
+      email_notifications: {
+        Row: {
+          behavior_score_id: string
+          created_at: string
+          email_address: string
+          error_message: string | null
+          id: string
+          is_sms_backup: boolean
+          message: string
+          parent_id: string
+          resend_message_id: string | null
+          sent_at: string | null
+          status: string
+          subject: string
+        }
+        Insert: {
+          behavior_score_id: string
+          created_at?: string
+          email_address: string
+          error_message?: string | null
+          id?: string
+          is_sms_backup?: boolean
+          message: string
+          parent_id: string
+          resend_message_id?: string | null
+          sent_at?: string | null
+          status?: string
+          subject: string
+        }
+        Update: {
+          behavior_score_id?: string
+          created_at?: string
+          email_address?: string
+          error_message?: string | null
+          id?: string
+          is_sms_backup?: boolean
+          message?: string
+          parent_id?: string
+          resend_message_id?: string | null
+          sent_at?: string | null
+          status?: string
+          subject?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "email_notifications_behavior_score_id_fkey"
+            columns: ["behavior_score_id"]
+            isOneToOne: false
+            referencedRelation: "behavior_scores"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "email_notifications_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "parents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       parents: {
         Row: {
           address: string | null
