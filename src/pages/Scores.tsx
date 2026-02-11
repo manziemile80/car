@@ -240,43 +240,45 @@ export default function Scores() {
               <DialogHeader>
                 <DialogTitle>Record Behavior Score</DialogTitle>
               </DialogHeader>
-              <form onSubmit={handleAddScore} className="space-y-5 mt-4">
-                <div className="space-y-2">
-                  <Label htmlFor="student">Student</Label>
-                  <Select value={selectedStudent} onValueChange={setSelectedStudent} required>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select a student" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {students.map((student) => (
-                        <SelectItem key={student.id} value={student.id}>
-                          {student.first_name} {student.last_name} - {student.class?.name || 'No class'}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+              <form onSubmit={handleAddScore} className="space-y-3 mt-2">
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="space-y-1.5">
+                    <Label htmlFor="student" className="text-sm">Student</Label>
+                    <Select value={selectedStudent} onValueChange={setSelectedStudent} required>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select a student" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {students.map((student) => (
+                          <SelectItem key={student.id} value={student.id}>
+                            {student.first_name} {student.last_name} - {student.class?.name || 'No class'}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <Label htmlFor="category" className="text-sm">Category</Label>
+                    <Select value={category} onValueChange={(v) => setCategory(v as BehaviorCategory)}>
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {categories.map((cat) => (
+                          <SelectItem key={cat} value={cat}>
+                            {categoryLabels[cat]}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="category">Category</Label>
-                  <Select value={category} onValueChange={(v) => setCategory(v as BehaviorCategory)}>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {categories.map((cat) => (
-                        <SelectItem key={cat} value={cat}>
-                          {categoryLabels[cat]}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div className="space-y-4">
                   <div className="flex items-center justify-between">
-                    <Label>Score</Label>
-                    <span className={`text-2xl font-bold ${getScoreColor(score[0])}`}>
+                    <Label className="text-sm">Score</Label>
+                    <span className={`text-lg font-bold ${getScoreColor(score[0])}`}>
                       {score[0]}
                     </span>
                   </div>
@@ -294,34 +296,35 @@ export default function Scores() {
                   </div>
                 </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="date">Date</Label>
-                  <Input
-                    id="date"
-                    type="date"
-                    value={scoreDate}
-                    onChange={(e) => setScoreDate(e.target.value)}
-                    required
-                  />
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="space-y-1.5">
+                    <Label htmlFor="date" className="text-sm">Date</Label>
+                    <Input
+                      id="date"
+                      type="date"
+                      value={scoreDate}
+                      onChange={(e) => setScoreDate(e.target.value)}
+                      required
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label htmlFor="notes" className="text-sm">Notes (Optional)</Label>
+                    <Textarea
+                      id="notes"
+                      value={notes}
+                      onChange={(e) => setNotes(e.target.value)}
+                      placeholder="Add notes..."
+                      rows={2}
+                    />
+                  </div>
                 </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="notes">Notes (Optional)</Label>
-                  <Textarea
-                    id="notes"
-                    value={notes}
-                    onChange={(e) => setNotes(e.target.value)}
-                    placeholder="Add any additional notes about this assessment..."
-                    rows={3}
-                  />
-                </div>
-
-                <div className="flex items-center gap-2 rounded-lg bg-info/10 p-3 text-sm text-info">
-                  <Bell className="h-4 w-4" />
+                <div className="flex items-center gap-2 rounded-lg bg-info/10 p-2 text-xs text-info">
+                  <Bell className="h-3.5 w-3.5" />
                   <span>Parents will be notified via SMS</span>
                 </div>
 
-                <div className="flex justify-end gap-3 pt-2">
+                <div className="flex justify-end gap-3 pt-1">
                   <Button type="button" variant="outline" onClick={() => setIsAddDialogOpen(false)}>
                     Cancel
                   </Button>
