@@ -10,8 +10,8 @@ export default function Settings() {
       <div className="space-y-6 animate-fade-in">
         {/* Header */}
         <div>
-          <h1 className="text-3xl font-bold text-foreground">Settings</h1>
-          <p className="mt-1 text-muted-foreground">
+          <h1 className="text-2xl sm:text-3xl font-bold text-foreground">Settings</h1>
+          <p className="mt-1 text-sm sm:text-base text-muted-foreground">
             Configure system preferences and notifications
           </p>
         </div>

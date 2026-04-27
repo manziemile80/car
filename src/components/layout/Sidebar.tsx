@@ -12,8 +12,12 @@ import {
   LogOut,
   Shield,
   BookOpen,
+  Menu,
+  X,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { useState, useEffect } from 'react';
+import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 
 interface NavItem {
   label: string;
@@ -36,6 +40,12 @@ const navItems: NavItem[] = [
 export function Sidebar() {
   const { role, profile, signOut } = useAuth();
   const location = useLocation();
+  const [mobileOpen, setMobileOpen] = useState(false);
+
+  // Close drawer on route change
+  useEffect(() => {
+    setMobileOpen(false);
+  }, [location.pathname]);
 
   const filteredNavItems = navItems.filter(
     (item) => role && item.roles.includes(role)
@@ -52,8 +62,8 @@ export function Sidebar() {
 
   const badge = getRoleBadge();
 
-  return (
-    <aside className="fixed inset-y-0 left-0 z-50 flex w-64 flex-col bg-sidebar">
+  const SidebarContent = () => (
+    <>
       {/* Logo */}
       <div className="flex h-16 items-center gap-3 border-b border-sidebar-border px-6">
         <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-sidebar-primary">
@@ -114,6 +124,37 @@ export function Sidebar() {
           Sign Out
         </Button>
       </div>
-    </aside>
+    </>
+  );
+
+  return (
+    <>
+      {/* Mobile top bar */}
+      <div className="lg:hidden fixed top-0 left-0 right-0 z-40 flex h-14 items-center justify-between border-b border-border bg-background px-4">
+        <div className="flex items-center gap-2">
+          <div className="flex h-8 w-8 items-center justify-center rounded-md bg-primary">
+            <Shield className="h-4 w-4 text-primary-foreground" />
+          </div>
+          <span className="text-base font-bold text-foreground">Conduct</span>
+        </div>
+        <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
+          <SheetTrigger asChild>
+            <Button variant="ghost" size="icon" aria-label="Open menu">
+              <Menu className="h-5 w-5" />
+            </Button>
+          </SheetTrigger>
+          <SheetContent side="left" className="w-64 p-0 bg-sidebar border-sidebar-border">
+            <div className="flex h-full flex-col">
+              <SidebarContent />
+            </div>
+          </SheetContent>
+        </Sheet>
+      </div>
+
+      {/* Desktop sidebar */}
+      <aside className="hidden lg:flex fixed inset-y-0 left-0 z-50 w-64 flex-col bg-sidebar">
+        <SidebarContent />
+      </aside>
+    </>
   );
 }
