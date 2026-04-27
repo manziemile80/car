@@ -31,7 +31,12 @@ const handler = async (req: Request): Promise<Response> => {
     const atApiKey = Deno.env.get("AFRICASTALKING_API_KEY");
     const atUsername = Deno.env.get("AFRICASTALKING_USERNAME");
 
+    // TextBee.dev
+    const textbeeApiKey = Deno.env.get("TEXTBEE_API_KEY");
+    const textbeeDeviceId = Deno.env.get("TEXTBEE_DEVICE_ID");
+
     console.log("SMS Notification function called");
+    console.log(`TextBee configured: ${!!textbeeApiKey && !!textbeeDeviceId}`);
     console.log(`Africa's Talking configured: ${!!atApiKey && !!atUsername}`);
     console.log(`Twilio configured: ${!!twilioAccountSid && !!twilioAuthToken}`);
 
@@ -89,8 +94,44 @@ const handler = async (req: Request): Promise<Response> => {
 
       console.log(`Preparing to send SMS to ${parent.phone}`);
 
-      // Try to send SMS via Twilio
-      if (twilioAccountSid && twilioAuthToken && twilioPhoneNumber) {
+      // Try TextBee.dev first (preferred)
+      if (textbeeApiKey && textbeeDeviceId) {
+        try {
+          console.log(`Sending SMS to ${parent.phone} via TextBee.dev`);
+          const tbResponse = await fetch(
+            `https://api.textbee.dev/api/v1/gateway/devices/${textbeeDeviceId}/send-sms`,
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                "x-api-key": textbeeApiKey,
+              },
+              body: JSON.stringify({
+                recipients: [parent.phone],
+                message: message,
+              }),
+            }
+          );
+
+          const tbText = await tbResponse.text();
+          console.log(`TextBee response status: ${tbResponse.status}`);
+          console.log(`TextBee response: ${tbText}`);
+
+          if (tbResponse.ok) {
+            smsStatus = "sent";
+            console.log(`SMS sent to ${parent.phone} via TextBee`);
+          } else {
+            errorMessage = `TextBee error [${tbResponse.status}]: ${tbText}`;
+            smsStatus = "failed";
+          }
+        } catch (e: any) {
+          console.error(`TextBee error: ${e.message}`);
+          errorMessage = e.message;
+          smsStatus = "failed";
+        }
+      }
+      // Try Twilio
+      else if (twilioAccountSid && twilioAuthToken && twilioPhoneNumber) {
         try {
           const twilioResponse = await fetch(
             `https://api.twilio.com/2010-04-01/Accounts/${twilioAccountSid}/Messages.json`,
