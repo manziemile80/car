@@ -213,15 +213,15 @@ export default function Scores() {
     <DashboardLayout>
       <div className="space-y-6 animate-fade-in">
         {/* Header */}
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
           <div>
-            <h1 className="text-3xl font-bold text-foreground">Behavior Scores</h1>
-            <p className="mt-1 text-muted-foreground">
+            <h1 className="text-2xl sm:text-3xl font-bold text-foreground">Behavior Scores</h1>
+            <p className="mt-1 text-sm sm:text-base text-muted-foreground">
               Record and manage student behavior assessments
             </p>
           </div>
-          <div className="flex gap-2">
-            <Button variant="outline" onClick={handleTestSms} disabled={testSmsLoading}>
+          <div className="flex flex-wrap gap-2">
+            <Button variant="outline" size="sm" onClick={handleTestSms} disabled={testSmsLoading}>
               {testSmsLoading ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
               ) : (
@@ -231,17 +231,17 @@ export default function Scores() {
             </Button>
             <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
               <DialogTrigger asChild>
-                <Button>
+                <Button size="sm">
                   <Plus className="h-4 w-4" />
                   Record Score
                 </Button>
               </DialogTrigger>
-            <DialogContent className="sm:max-w-lg">
+            <DialogContent className="sm:max-w-lg max-h-[90vh] overflow-y-auto p-4 sm:p-6 w-[calc(100%-1rem)]">
               <DialogHeader>
                 <DialogTitle>Record Behavior Score</DialogTitle>
               </DialogHeader>
               <form onSubmit={handleAddScore} className="space-y-3 mt-2">
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div className="space-y-1.5">
                     <Label htmlFor="student" className="text-sm">Student</Label>
                     <Select value={selectedStudent} onValueChange={setSelectedStudent} required>
@@ -296,7 +296,7 @@ export default function Scores() {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div className="space-y-1.5">
                     <Label htmlFor="date" className="text-sm">Date</Label>
                     <Input
@@ -324,11 +324,11 @@ export default function Scores() {
                   <span>Parents will be notified via SMS</span>
                 </div>
 
-                <div className="flex justify-end gap-3 pt-1">
-                  <Button type="button" variant="outline" onClick={() => setIsAddDialogOpen(false)}>
+                <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-2 pt-1">
+                  <Button type="button" variant="outline" onClick={() => setIsAddDialogOpen(false)} className="w-full sm:w-auto">
                     Cancel
                   </Button>
-                  <Button type="submit" disabled={formLoading || !selectedStudent}>
+                  <Button type="submit" disabled={formLoading || !selectedStudent} className="w-full sm:w-auto">
                     {formLoading ? (
                       <>
                         <Loader2 className="h-4 w-4 animate-spin" />
@@ -346,7 +346,7 @@ export default function Scores() {
         </div>
 
         {/* Search */}
-        <div className="relative max-w-sm">
+        <div className="relative w-full sm:max-w-sm">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input
             placeholder="Search by student name..."
@@ -372,8 +372,8 @@ export default function Scores() {
             </CardContent>
           </Card>
         ) : (
-          <div className="overflow-hidden rounded-lg border border-border bg-card">
-            <table className="w-full">
+          <div className="overflow-x-auto rounded-lg border border-border bg-card">
+            <table className="w-full min-w-[640px]">
               <thead>
                 <tr className="border-b border-border bg-muted/50">
                   <th className="px-4 py-3 text-left text-sm font-semibold text-muted-foreground">
