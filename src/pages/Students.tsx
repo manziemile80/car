@@ -20,7 +20,7 @@ import {
 } from '@/components/ui/select';
 import { supabase } from '@/integrations/supabase/client';
 import { Student, Class, Parent, StudentParent } from '@/types/database';
-import { Plus, Search, GraduationCap, Loader2, Users } from 'lucide-react';
+import { Plus, Search, GraduationCap, Loader2, Users, Pencil } from 'lucide-react';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { LinkParentsDialog } from '@/components/students/LinkParentsDialog';
@@ -41,6 +41,8 @@ export default function Students() {
   const [searchQuery, setSearchQuery] = useState('');
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [formLoading, setFormLoading] = useState(false);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [editingStudent, setEditingStudent] = useState<StudentWithClass | null>(null);
   
   // Link parents dialog state
   const [linkDialogOpen, setLinkDialogOpen] = useState(false);
@@ -52,6 +54,7 @@ export default function Students() {
   const [studentId, setStudentId] = useState('');
   const [classId, setClassId] = useState('');
   const [dateOfBirth, setDateOfBirth] = useState('');
+  const [status, setStatus] = useState('active');
 
   useEffect(() => {
     fetchData();
@@ -86,6 +89,49 @@ export default function Students() {
     setLinkDialogOpen(true);
   };
 
+  const handleOpenEditDialog = (student: StudentWithClass) => {
+    setEditingStudent(student);
+    setFirstName(student.first_name);
+    setLastName(student.last_name);
+    setStudentId(student.student_id);
+    setClassId(student.class_id || '');
+    setDateOfBirth(student.date_of_birth || '');
+    setStatus(student.status || 'active');
+    setIsEditDialogOpen(true);
+  };
+
+  const handleEditStudent = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingStudent) return;
+    setFormLoading(true);
+
+    try {
+      const { error } = await supabase
+        .from('students')
+        .update({
+          first_name: firstName,
+          last_name: lastName,
+          student_id: studentId,
+          class_id: classId || null,
+          date_of_birth: dateOfBirth || null,
+          status,
+        })
+        .eq('id', editingStudent.id);
+
+      if (error) throw error;
+
+      toast.success('Student updated successfully');
+      setIsEditDialogOpen(false);
+      setEditingStudent(null);
+      resetForm();
+      fetchData();
+    } catch (error: any) {
+      toast.error('Failed to update student', { description: error.message });
+    } finally {
+      setFormLoading(false);
+    }
+  };
+
   const handleAddStudent = async (e: React.FormEvent) => {
     e.preventDefault();
     setFormLoading(true);
@@ -118,6 +164,7 @@ export default function Students() {
     setStudentId('');
     setClassId('');
     setDateOfBirth('');
+    setStatus('active');
   };
 
   const filteredStudents = students.filter((student) => {
@@ -312,11 +359,118 @@ export default function Students() {
                     <Users className="h-4 w-4" />
                     Link Parents
                   </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="w-full mt-2"
+                    onClick={() => handleOpenEditDialog(student)}
+                  >
+                    <Pencil className="h-4 w-4" />
+                    Edit
+                  </Button>
                 </CardContent>
               </Card>
             ))}
           </div>
         )}
+
+        {/* Edit Student Dialog */}
+        <Dialog open={isEditDialogOpen} onOpenChange={(open) => {
+          setIsEditDialogOpen(open);
+          if (!open) {
+            setEditingStudent(null);
+            resetForm();
+          }
+        }}>
+          <DialogContent className="sm:max-w-md max-h-[90vh] overflow-y-auto w-[calc(100%-1rem)]">
+            <DialogHeader>
+              <DialogTitle>Edit Student</DialogTitle>
+            </DialogHeader>
+            <form onSubmit={handleEditStudent} className="space-y-4 mt-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="editFirstName">First Name</Label>
+                  <Input
+                    id="editFirstName"
+                    value={firstName}
+                    onChange={(e) => setFirstName(e.target.value)}
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="editLastName">Last Name</Label>
+                  <Input
+                    id="editLastName"
+                    value={lastName}
+                    onChange={(e) => setLastName(e.target.value)}
+                    required
+                  />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="editStudentId">Student ID</Label>
+                <Input
+                  id="editStudentId"
+                  value={studentId}
+                  onChange={(e) => setStudentId(e.target.value)}
+                  required
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="editClass">Class</Label>
+                <Select value={classId} onValueChange={setClassId}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select a class" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {classes.map((cls) => (
+                      <SelectItem key={cls.id} value={cls.id}>
+                        {cls.name} - {cls.grade_level}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="editDob">Date of Birth</Label>
+                <Input
+                  id="editDob"
+                  type="date"
+                  value={dateOfBirth}
+                  onChange={(e) => setDateOfBirth(e.target.value)}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="editStatus">Status</Label>
+                <Select value={status} onValueChange={setStatus}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="active">Active</SelectItem>
+                    <SelectItem value="inactive">Inactive</SelectItem>
+                    <SelectItem value="graduated">Graduated</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="flex justify-end gap-3 pt-4">
+                <Button type="button" variant="outline" onClick={() => setIsEditDialogOpen(false)}>
+                  Cancel
+                </Button>
+                <Button type="submit" disabled={formLoading}>
+                  {formLoading ? (
+                    <>
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      Saving...
+                    </>
+                  ) : (
+                    'Save Changes'
+                  )}
+                </Button>
+              </div>
+            </form>
+          </DialogContent>
+        </Dialog>
 
         {/* Link Parents Dialog */}
         {selectedStudent && (

@@ -13,7 +13,7 @@ import {
 } from '@/components/ui/dialog';
 import { supabase } from '@/integrations/supabase/client';
 import { Parent, StudentParent, Student } from '@/types/database';
-import { Plus, Search, UserCheck, Loader2, Phone, Mail } from 'lucide-react';
+import { Plus, Search, UserCheck, Loader2, Phone, Mail, Pencil } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface ParentWithChildren extends Parent {
@@ -30,6 +30,8 @@ export default function Parents() {
   const [searchQuery, setSearchQuery] = useState('');
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [formLoading, setFormLoading] = useState(false);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [editingParent, setEditingParent] = useState<ParentWithChildren | null>(null);
   
   // Form state
   const [fullName, setFullName] = useState('');
@@ -106,6 +108,45 @@ export default function Parents() {
     setEmail('');
     setPhone('');
     setAddress('');
+  };
+
+  const handleOpenEditDialog = (parent: ParentWithChildren) => {
+    setEditingParent(parent);
+    setFullName(parent.full_name);
+    setEmail(parent.email);
+    setPhone(parent.phone);
+    setAddress(parent.address || '');
+    setIsEditDialogOpen(true);
+  };
+
+  const handleEditParent = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingParent) return;
+    setFormLoading(true);
+
+    try {
+      const { error } = await supabase
+        .from('parents')
+        .update({
+          full_name: fullName,
+          email,
+          phone,
+          address: address || null,
+        })
+        .eq('id', editingParent.id);
+
+      if (error) throw error;
+
+      toast.success('Parent updated successfully');
+      setIsEditDialogOpen(false);
+      setEditingParent(null);
+      resetForm();
+      fetchData();
+    } catch (error: any) {
+      toast.error('Failed to update parent', { description: error.message });
+    } finally {
+      setFormLoading(false);
+    }
   };
 
   const filteredParents = parents.filter((parent) =>
@@ -264,11 +305,89 @@ export default function Parents() {
                       </div>
                     </div>
                   )}
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="w-full mt-4"
+                    onClick={() => handleOpenEditDialog(parent)}
+                  >
+                    <Pencil className="h-4 w-4" />
+                    Edit
+                  </Button>
                 </CardContent>
               </Card>
             ))}
           </div>
         )}
+
+        {/* Edit Parent Dialog */}
+        <Dialog open={isEditDialogOpen} onOpenChange={(open) => {
+          setIsEditDialogOpen(open);
+          if (!open) {
+            setEditingParent(null);
+            resetForm();
+          }
+        }}>
+          <DialogContent className="sm:max-w-md max-h-[90vh] overflow-y-auto w-[calc(100%-1rem)]">
+            <DialogHeader>
+              <DialogTitle>Edit Parent</DialogTitle>
+            </DialogHeader>
+            <form onSubmit={handleEditParent} className="space-y-4 mt-4">
+              <div className="space-y-2">
+                <Label htmlFor="editFullName">Full Name</Label>
+                <Input
+                  id="editFullName"
+                  value={fullName}
+                  onChange={(e) => setFullName(e.target.value)}
+                  required
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="editEmail">Email</Label>
+                <Input
+                  id="editEmail"
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="editPhone">Phone Number</Label>
+                <Input
+                  id="editPhone"
+                  type="tel"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                  required
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="editAddress">Address (Optional)</Label>
+                <Input
+                  id="editAddress"
+                  value={address}
+                  onChange={(e) => setAddress(e.target.value)}
+                />
+              </div>
+              <div className="flex justify-end gap-3 pt-4">
+                <Button type="button" variant="outline" onClick={() => setIsEditDialogOpen(false)}>
+                  Cancel
+                </Button>
+                <Button type="submit" disabled={formLoading}>
+                  {formLoading ? (
+                    <>
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      Saving...
+                    </>
+                  ) : (
+                    'Save Changes'
+                  )}
+                </Button>
+              </div>
+            </form>
+          </DialogContent>
+        </Dialog>
       </div>
     </DashboardLayout>
   );
