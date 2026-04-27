@@ -140,8 +140,8 @@ export default function UsersPage() {
       <div className="space-y-6 animate-fade-in">
         {/* Header */}
         <div>
-          <h1 className="text-3xl font-bold text-foreground">User Management</h1>
-          <p className="mt-1 text-muted-foreground">
+          <h1 className="text-2xl sm:text-3xl font-bold text-foreground">User Management</h1>
+          <p className="mt-1 text-sm sm:text-base text-muted-foreground">
             Manage user accounts and role assignments
           </p>
         </div>
@@ -160,8 +160,8 @@ export default function UsersPage() {
             </CardContent>
           </Card>
         ) : (
-          <div className="overflow-hidden rounded-lg border border-border bg-card">
-            <table className="w-full">
+          <div className="overflow-x-auto rounded-lg border border-border bg-card">
+            <table className="w-full min-w-[640px]">
               <thead>
                 <tr className="border-b border-border bg-muted/50">
                   <th className="px-4 py-3 text-left text-sm font-semibold text-muted-foreground">

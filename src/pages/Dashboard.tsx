@@ -95,17 +95,17 @@ export default function Dashboard() {
       <div className="space-y-8 animate-fade-in">
         {/* Header */}
         <div>
-          <h1 className="text-3xl font-bold text-foreground">
+          <h1 className="text-2xl sm:text-3xl font-bold text-foreground">
             {getGreeting()}, {profile?.full_name?.split(' ')[0] || 'there'}!
           </h1>
-          <p className="mt-1 text-muted-foreground">
+          <p className="mt-1 text-sm sm:text-base text-muted-foreground">
             Welcome to your {role ? roleLabels[role] : ''} dashboard. Here's what's happening today.
           </p>
         </div>
 
         {/* Stats Grid */}
         {(role === 'admin' || role === 'teacher') && (
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+          <div className="grid gap-4 sm:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
             <StatCard
               title="Total Students"
               value={stats.totalStudents}
