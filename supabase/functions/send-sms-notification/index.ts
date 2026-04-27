@@ -87,7 +87,7 @@ const handler = async (req: Request): Promise<Response> => {
         continue;
       }
 
-      const message = `Dear Parent, the behavior score for your child ${student.first_name} ${student.last_name} has been updated to ${score} on ${date}. Thank you.`;
+      const message = `College de Rebero: Dear Parent, the behavior score for your child ${student.first_name} ${student.last_name} has been updated to ${score} on ${date}. Thank you.`;
 
       let smsStatus = "pending";
       let errorMessage = null;
