@@ -23,16 +23,16 @@ interface NavItem {
   label: string;
   href: string;
   icon: React.ElementType;
-  roles: ('admin' | 'teacher' | 'parent')[];
+  roles: ('admin' | 'teacher' | 'parent' | 'viewer')[];
 }
 
 const navItems: NavItem[] = [
-  { label: 'Dashboard', href: '/dashboard', icon: LayoutDashboard, roles: ['admin', 'teacher', 'parent'] },
-  { label: 'Students', href: '/students', icon: GraduationCap, roles: ['admin', 'teacher'] },
-  { label: 'Classes', href: '/classes', icon: BookOpen, roles: ['admin', 'teacher'] },
+  { label: 'Dashboard', href: '/dashboard', icon: LayoutDashboard, roles: ['admin', 'teacher', 'parent', 'viewer'] },
+  { label: 'Students', href: '/students', icon: GraduationCap, roles: ['admin', 'teacher', 'viewer'] },
+  { label: 'Classes', href: '/classes', icon: BookOpen, roles: ['admin', 'teacher', 'viewer'] },
   { label: 'Parents', href: '/parents', icon: UserCheck, roles: ['admin'] },
-  { label: 'Behavior Scores', href: '/scores', icon: ClipboardList, roles: ['admin', 'teacher'] },
-  { label: 'Reports', href: '/reports', icon: BarChart3, roles: ['admin', 'teacher', 'parent'] },
+  { label: 'Behavior Scores', href: '/scores', icon: ClipboardList, roles: ['admin', 'teacher', 'viewer'] },
+  { label: 'Reports', href: '/reports', icon: BarChart3, roles: ['admin', 'teacher', 'parent', 'viewer'] },
   { label: 'Users', href: '/users', icon: Users, roles: ['admin'] },
   { label: 'Settings', href: '/settings', icon: Settings, roles: ['admin'] },
 ];
@@ -56,6 +56,7 @@ export function Sidebar() {
       admin: { label: 'Administrator', className: 'bg-accent/20 text-accent' },
       teacher: { label: 'Teacher', className: 'bg-secondary/20 text-secondary' },
       parent: { label: 'Parent', className: 'bg-primary/20 text-primary-foreground' },
+      viewer: { label: 'Viewer (read-only)', className: 'bg-muted text-muted-foreground' },
     };
     return role ? badges[role] : null;
   };
