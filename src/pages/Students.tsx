@@ -32,6 +32,8 @@ interface LinkedParent extends StudentParent {
 interface StudentWithClass extends Student {
   class?: Class | null;
   student_parents?: LinkedParent[];
+  cumulative_score?: number;
+  entries_count?: number;
 }
 
 export default function Students() {
@@ -62,16 +64,31 @@ export default function Students() {
 
   const fetchData = async () => {
     try {
-      const [studentsRes, classesRes] = await Promise.all([
+      const [studentsRes, classesRes, cumRes] = await Promise.all([
         supabase
           .from('students')
           .select('*, class:classes(*), student_parents(*, parent:parents(*))')
           .order('last_name'),
         supabase.from('classes').select('*').order('name'),
+        supabase.from('student_cumulative_scores' as any).select('*'),
       ]);
 
       if (studentsRes.data) {
-        setStudents(studentsRes.data as StudentWithClass[]);
+        const cumMap = new Map<string, { cumulative_score: number; entries_count: number }>();
+        if (cumRes && (cumRes as any).data) {
+          for (const row of (cumRes as any).data as any[]) {
+            cumMap.set(row.student_id, {
+              cumulative_score: row.cumulative_score ?? 0,
+              entries_count: row.entries_count ?? 0,
+            });
+          }
+        }
+        const merged = (studentsRes.data as StudentWithClass[]).map((s) => ({
+          ...s,
+          cumulative_score: cumMap.get(s.id)?.cumulative_score ?? 0,
+          entries_count: cumMap.get(s.id)?.entries_count ?? 0,
+        }));
+        setStudents(merged);
       }
       if (classesRes.data) {
         setClasses(classesRes.data as Class[]);
@@ -347,6 +364,15 @@ export default function Students() {
                       <span className="text-muted-foreground">Parents</span>
                       <span className="font-medium">
                         {student.student_parents?.length || 0} linked
+                      </span>
+                    </div>
+                    <div className="flex justify-between items-center pt-2 border-t border-border">
+                      <span className="text-muted-foreground">Total Conduct</span>
+                      <span className="font-semibold text-primary">
+                        {student.cumulative_score ?? 0}
+                        <span className="ml-1 text-xs text-muted-foreground font-normal">
+                          ({student.entries_count ?? 0} entries)
+                        </span>
                       </span>
                     </div>
                   </div>

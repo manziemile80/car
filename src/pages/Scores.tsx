@@ -45,6 +45,7 @@ export default function Scores() {
   const { user } = useAuth();
   const [scores, setScores] = useState<BehaviorScoreWithDetails[]>([]);
   const [students, setStudents] = useState<StudentWithClass[]>([]);
+  const [cumulativeMap, setCumulativeMap] = useState<Record<string, number>>({});
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
@@ -66,12 +67,13 @@ export default function Scores() {
 
   const fetchData = async () => {
     try {
-      const [scoresRes, studentsRes] = await Promise.all([
+      const [scoresRes, studentsRes, cumRes] = await Promise.all([
         supabase
           .from('behavior_scores')
           .select('*, student:students(*, class:classes(*)), teacher:profiles(*)') 
           .order('created_at', { ascending: false }),
         supabase.from('students').select('*, class:classes(*)').order('last_name'),
+        supabase.from('student_cumulative_scores' as any).select('*'),
       ]);
 
       if (scoresRes.data) {
@@ -79,6 +81,13 @@ export default function Scores() {
       }
       if (studentsRes.data) {
         setStudents(studentsRes.data as StudentWithClass[]);
+      }
+      if (cumRes && (cumRes as any).data) {
+        const map: Record<string, number> = {};
+        for (const row of (cumRes as any).data as any[]) {
+          map[row.student_id] = row.cumulative_score ?? 0;
+        }
+        setCumulativeMap(map);
       }
     } catch (error) {
       console.error('Error fetching data:', error);
@@ -386,6 +395,9 @@ export default function Scores() {
                     Score
                   </th>
                   <th className="px-4 py-3 text-left text-sm font-semibold text-muted-foreground">
+                    Running Total
+                  </th>
+                  <th className="px-4 py-3 text-left text-sm font-semibold text-muted-foreground">
                     Date
                   </th>
                   <th className="px-4 py-3 text-left text-sm font-semibold text-muted-foreground">
@@ -416,6 +428,11 @@ export default function Scores() {
                     </td>
                     <td className="px-4 py-4">
                       <ScoreBadge score={score.score} />
+                    </td>
+                    <td className="px-4 py-4">
+                      <span className="font-semibold text-primary">
+                        {cumulativeMap[score.student_id] ?? 0}
+                      </span>
                     </td>
                     <td className="px-4 py-4 text-sm text-muted-foreground">
                       {format(new Date(score.score_date), 'MMM d, yyyy')}
