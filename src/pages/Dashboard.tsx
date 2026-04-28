@@ -99,7 +99,7 @@ export default function Dashboard() {
             {getGreeting()}, {profile?.full_name?.split(' ')[0] || 'there'}!
           </h1>
           <p className="mt-1 text-sm sm:text-base text-muted-foreground">
-            Welcome to your {role ? roleLabels[role] : ''} dashboard. Here's what's happening today.
+            Welcome to your User dashboard. Here's what's happening today.
           </p>
         </div>
 
