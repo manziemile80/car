@@ -53,6 +53,13 @@ export type Database = {
             foreignKeyName: "behavior_scores_student_id_fkey"
             columns: ["student_id"]
             isOneToOne: false
+            referencedRelation: "student_cumulative_scores"
+            referencedColumns: ["student_id"]
+          },
+          {
+            foreignKeyName: "behavior_scores_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
             referencedRelation: "students"
             referencedColumns: ["id"]
           },
@@ -309,6 +316,13 @@ export type Database = {
             foreignKeyName: "student_parents_student_id_fkey"
             columns: ["student_id"]
             isOneToOne: false
+            referencedRelation: "student_cumulative_scores"
+            referencedColumns: ["student_id"]
+          },
+          {
+            foreignKeyName: "student_parents_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
             referencedRelation: "students"
             referencedColumns: ["id"]
           },
@@ -384,10 +398,22 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      student_cumulative_scores: {
+        Row: {
+          cumulative_score: number | null
+          entries_count: number | null
+          last_score_date: string | null
+          student_id: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       get_parent_student_ids: { Args: { _user_id: string }; Returns: string[] }
+      get_student_cumulative_score: {
+        Args: { _student_id: string }
+        Returns: number
+      }
       get_user_role: {
         Args: { _user_id: string }
         Returns: Database["public"]["Enums"]["app_role"]
