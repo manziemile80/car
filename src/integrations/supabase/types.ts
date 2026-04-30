@@ -403,6 +403,7 @@ export type Database = {
           cumulative_score: number | null
           entries_count: number | null
           last_score_date: string | null
+          remaining_marks: number | null
           student_id: string | null
         }
         Relationships: []
