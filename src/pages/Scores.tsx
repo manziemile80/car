@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -42,6 +43,7 @@ const categoryLabels: Record<BehaviorCategory, string> = {
 const categories: BehaviorCategory[] = ['discipline', 'respect', 'attendance', 'participation'];
 
 export default function Scores() {
+  const [searchParams, setSearchParams] = useSearchParams();
   const { user } = useAuth();
   const [scores, setScores] = useState<BehaviorScoreWithDetails[]>([]);
   const [students, setStudents] = useState<StudentWithClass[]>([]);
@@ -49,6 +51,14 @@ export default function Scores() {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
+
+  useEffect(() => {
+    if (searchParams.get('action') === 'new') {
+      setIsAddDialogOpen(true);
+      searchParams.delete('action');
+      setSearchParams(searchParams, { replace: true });
+    }
+  }, [searchParams, setSearchParams]);
   const [formLoading, setFormLoading] = useState(false);
   const [testSmsLoading, setTestSmsLoading] = useState(false);
   const [selectedScore, setSelectedScore] = useState<BehaviorScoreWithDetails | null>(null);
