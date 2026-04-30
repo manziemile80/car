@@ -87,7 +87,36 @@ const handler = async (req: Request): Promise<Response> => {
         continue;
       }
 
-      const message = `College de Rebero: Dear Parent, the behavior score for your child ${student.first_name} ${student.last_name} has been updated to ${score} on ${date}. Thank you.`;
+      // Fetch the student's current cumulative & remaining marks for context
+      let remainingMarks: number | null = null;
+      try {
+        const { data: cumRow } = await supabase
+          .from("student_cumulative_scores")
+          .select("remaining_marks")
+          .eq("student_id", studentId)
+          .maybeSingle();
+        if (cumRow && typeof (cumRow as any).remaining_marks === "number") {
+          remainingMarks = (cumRow as any).remaining_marks;
+        }
+      } catch (_) {
+        // non-fatal
+      }
+
+      const childName = `${student.first_name} ${student.last_name}`;
+      const isDeduction = score < 0;
+      const absScore = Math.abs(score);
+      const remainingText = remainingMarks !== null ? `${remainingMarks}/100` : "N/A";
+
+      // Bilingual message: English + Kinyarwanda in a single SMS
+      const englishPart = isDeduction
+        ? `College de Rebero: Dear Parent, ${absScore} marks were deducted from your child ${childName} on ${date}. Remaining marks: ${remainingText}.`
+        : `College de Rebero: Dear Parent, ${absScore} marks were added for your child ${childName} on ${date}. Remaining marks: ${remainingText}.`;
+
+      const kinyarwandaPart = isDeduction
+        ? `Mwiriwe! Umwana wanyu ${childName} yakuweho amanota ${absScore} ku itariki ${date}. Amanota asigaye: ${remainingText}.`
+        : `Mwiriwe! Umwana wanyu ${childName} yongereweho amanota ${absScore} ku itariki ${date}. Amanota asigaye: ${remainingText}.`;
+
+      const message = `${englishPart}\n\n${kinyarwandaPart}`;
 
       let smsStatus = "pending";
       let errorMessage = null;

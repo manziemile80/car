@@ -7,17 +7,19 @@ interface ScoreBadgeProps {
 
 export function ScoreBadge({ score, size = 'md' }: ScoreBadgeProps) {
   const getScoreClass = (score: number) => {
+    if (score < 0) return 'bg-destructive/15 text-destructive border-destructive/30';
+    if (score === 0) return 'bg-muted text-muted-foreground border-border';
     if (score >= 80) return 'bg-success/15 text-success border-success/30';
-    if (score >= 60) return 'bg-secondary/15 text-secondary border-secondary/30';
-    if (score >= 40) return 'bg-warning/15 text-warning border-warning/30';
-    return 'bg-destructive/15 text-destructive border-destructive/30';
+    if (score >= 40) return 'bg-secondary/15 text-secondary border-secondary/30';
+    return 'bg-warning/15 text-warning border-warning/30';
   };
 
   const getScoreLabel = (score: number) => {
+    if (score < 0) return 'Deducted';
+    if (score === 0) return 'No change';
     if (score >= 80) return 'Excellent';
-    if (score >= 60) return 'Good';
-    if (score >= 40) return 'Average';
-    return 'Needs Improvement';
+    if (score >= 40) return 'Good';
+    return 'Added';
   };
 
   const sizeClasses = {
@@ -34,7 +36,7 @@ export function ScoreBadge({ score, size = 'md' }: ScoreBadgeProps) {
         sizeClasses[size]
       )}
     >
-      <span className="font-bold">{score}</span>
+      <span className="font-bold">{score > 0 ? `+${score}` : score}</span>
       <span className="opacity-80">• {getScoreLabel(score)}</span>
     </span>
   );

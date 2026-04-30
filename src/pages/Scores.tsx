@@ -7,6 +7,16 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Slider } from '@/components/ui/slider';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from '@/components/ui/command';
+import { cn } from '@/lib/utils';
 import {
   Dialog,
   DialogContent,
@@ -24,7 +34,7 @@ import {
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { Student, Class, BehaviorCategory, BehaviorScoreWithDetails } from '@/types/database';
-import { Plus, Search, ClipboardList, Loader2, Bell, Send, Eye } from 'lucide-react';
+import { Plus, Search, ClipboardList, Loader2, Bell, Send, Eye, Check, ChevronsUpDown, Minus } from 'lucide-react';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { ScoreBadge } from '@/components/dashboard/ScoreBadge';
@@ -48,6 +58,7 @@ export default function Scores() {
   const [scores, setScores] = useState<BehaviorScoreWithDetails[]>([]);
   const [students, setStudents] = useState<StudentWithClass[]>([]);
   const [cumulativeMap, setCumulativeMap] = useState<Record<string, number>>({});
+  const [remainingMap, setRemainingMap] = useState<Record<string, number>>({});
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
@@ -66,8 +77,10 @@ export default function Scores() {
   
   // Form state
   const [selectedStudent, setSelectedStudent] = useState('');
+  const [studentPickerOpen, setStudentPickerOpen] = useState(false);
   const [category, setCategory] = useState<BehaviorCategory>('discipline');
-  const [score, setScore] = useState([75]);
+  const [scoreMode, setScoreMode] = useState<'add' | 'deduct'>('add');
+  const [score, setScore] = useState([10]);
   const [notes, setNotes] = useState('');
   const [scoreDate, setScoreDate] = useState(format(new Date(), 'yyyy-MM-dd'));
 
@@ -94,10 +107,13 @@ export default function Scores() {
       }
       if (cumRes && (cumRes as any).data) {
         const map: Record<string, number> = {};
+        const rmap: Record<string, number> = {};
         for (const row of (cumRes as any).data as any[]) {
           map[row.student_id] = row.cumulative_score ?? 0;
+          rmap[row.student_id] = row.remaining_marks ?? 100;
         }
         setCumulativeMap(map);
+        setRemainingMap(rmap);
       }
     } catch (error) {
       console.error('Error fetching data:', error);
@@ -114,11 +130,12 @@ export default function Scores() {
     setFormLoading(true);
 
     try {
+      const finalScore = scoreMode === 'deduct' ? -Math.abs(score[0]) : Math.abs(score[0]);
       const { data: scoreData, error } = await supabase.from('behavior_scores').insert({
         student_id: selectedStudent,
         teacher_id: user.id,
         category,
-        score: score[0],
+        score: finalScore,
         notes: notes || null,
         score_date: scoreDate,
       }).select().single();
@@ -128,15 +145,15 @@ export default function Scores() {
       // Send SMS notification
       if (scoreData) {
         try {
-          await sendSmsNotification(scoreData.id, selectedStudent, score[0], scoreDate);
+          await sendSmsNotification(scoreData.id, selectedStudent, finalScore, scoreDate);
         } catch (smsError) {
           console.error('SMS notification failed:', smsError);
           // Don't fail the whole operation if SMS fails
         }
       }
 
-      toast.success('Behavior score recorded', {
-        description: 'Parents will be notified via SMS',
+      toast.success(scoreMode === 'deduct' ? 'Marks deducted' : 'Marks added', {
+        description: `${finalScore > 0 ? '+' : ''}${finalScore} points · Parents notified via SMS`,
       });
       setIsAddDialogOpen(false);
       resetForm();
@@ -169,7 +186,8 @@ export default function Scores() {
   const resetForm = () => {
     setSelectedStudent('');
     setCategory('discipline');
-    setScore([75]);
+    setScoreMode('add');
+    setScore([10]);
     setNotes('');
     setScoreDate(format(new Date(), 'yyyy-MM-dd'));
   };
@@ -222,11 +240,17 @@ export default function Scores() {
   });
 
   const getScoreColor = (value: number) => {
-    if (value >= 80) return 'text-success';
-    if (value >= 60) return 'text-secondary';
-    if (value >= 40) return 'text-warning';
-    return 'text-destructive';
+    if (value > 0) return 'text-success';
+    if (value < 0) return 'text-destructive';
+    return 'text-muted-foreground';
   };
+
+  const selectedStudentObj = students.find((s) => s.id === selectedStudent);
+  const previewRemaining =
+    selectedStudent
+      ? (remainingMap[selectedStudent] ?? 100) +
+        (scoreMode === 'deduct' ? -Math.abs(score[0]) : Math.abs(score[0]))
+      : null;
 
   return (
     <DashboardLayout>
@@ -263,18 +287,64 @@ export default function Scores() {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div className="space-y-1.5">
                     <Label htmlFor="student" className="text-sm">Student</Label>
-                    <Select value={selectedStudent} onValueChange={setSelectedStudent} required>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select a student" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {students.map((student) => (
-                          <SelectItem key={student.id} value={student.id}>
-                            {student.first_name} {student.last_name} - {student.class?.name || 'No class'}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                    <Popover open={studentPickerOpen} onOpenChange={setStudentPickerOpen}>
+                      <PopoverTrigger asChild>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          role="combobox"
+                          aria-expanded={studentPickerOpen}
+                          className="w-full justify-between font-normal"
+                        >
+                          {selectedStudentObj
+                            ? `${selectedStudentObj.first_name} ${selectedStudentObj.last_name}${selectedStudentObj.class?.name ? ' · ' + selectedStudentObj.class.name : ''}`
+                            : 'Search and select a student...'}
+                          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-[--radix-popover-trigger-width] p-0" align="start">
+                        <Command>
+                          <CommandInput placeholder="Search by name, ID or class..." />
+                          <CommandList>
+                            <CommandEmpty>No student found.</CommandEmpty>
+                            <CommandGroup>
+                              {students.map((student) => {
+                                const label = `${student.first_name} ${student.last_name} ${student.student_id} ${student.class?.name ?? ''}`;
+                                const remaining = remainingMap[student.id] ?? 100;
+                                return (
+                                  <CommandItem
+                                    key={student.id}
+                                    value={label}
+                                    onSelect={() => {
+                                      setSelectedStudent(student.id);
+                                      setStudentPickerOpen(false);
+                                    }}
+                                  >
+                                    <Check
+                                      className={cn(
+                                        'mr-2 h-4 w-4',
+                                        selectedStudent === student.id ? 'opacity-100' : 'opacity-0'
+                                      )}
+                                    />
+                                    <div className="flex flex-1 items-center justify-between gap-2">
+                                      <span>
+                                        {student.first_name} {student.last_name}
+                                        <span className="ml-1 text-xs text-muted-foreground">
+                                          {student.class?.name || 'No class'}
+                                        </span>
+                                      </span>
+                                      <span className="text-xs font-medium text-primary">
+                                        {remaining} pts
+                                      </span>
+                                    </div>
+                                  </CommandItem>
+                                );
+                              })}
+                            </CommandGroup>
+                          </CommandList>
+                        </Command>
+                      </PopoverContent>
+                    </Popover>
                   </div>
 
                   <div className="space-y-1.5">
@@ -294,25 +364,54 @@ export default function Scores() {
                   </div>
                 </div>
 
+                {/* Add / Deduct toggle */}
+                <div className="space-y-1.5">
+                  <Label className="text-sm">Action</Label>
+                  <div className="grid grid-cols-2 gap-2">
+                    <Button
+                      type="button"
+                      variant={scoreMode === 'add' ? 'default' : 'outline'}
+                      onClick={() => setScoreMode('add')}
+                      className="gap-1"
+                    >
+                      <Plus className="h-4 w-4" /> Add Marks
+                    </Button>
+                    <Button
+                      type="button"
+                      variant={scoreMode === 'deduct' ? 'destructive' : 'outline'}
+                      onClick={() => setScoreMode('deduct')}
+                      className="gap-1"
+                    >
+                      <Minus className="h-4 w-4" /> Deduct Marks
+                    </Button>
+                  </div>
+                </div>
+
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
-                    <Label className="text-sm">Score</Label>
-                    <span className={`text-lg font-bold ${getScoreColor(score[0])}`}>
-                      {score[0]}
+                    <Label className="text-sm">Points {scoreMode === 'deduct' ? 'to deduct' : 'to add'}</Label>
+                    <span className={`text-lg font-bold ${scoreMode === 'deduct' ? 'text-destructive' : 'text-success'}`}>
+                      {scoreMode === 'deduct' ? '-' : '+'}{Math.abs(score[0])}
                     </span>
                   </div>
                   <Slider
                     value={score}
                     onValueChange={setScore}
+                    min={1}
                     max={100}
                     step={1}
                     className="w-full"
                   />
-                  <div className="flex justify-between text-xs text-muted-foreground">
-                    <span>0 - Poor</span>
-                    <span>50 - Average</span>
-                    <span>100 - Excellent</span>
-                  </div>
+                  {selectedStudent && (
+                    <div className="flex items-center justify-between rounded-md bg-muted/60 px-3 py-2 text-xs">
+                      <span className="text-muted-foreground">
+                        Current: <span className="font-semibold text-foreground">{remainingMap[selectedStudent] ?? 100}</span> pts
+                      </span>
+                      <span className="text-muted-foreground">
+                        After: <span className={`font-semibold ${(previewRemaining ?? 0) >= 50 ? 'text-success' : (previewRemaining ?? 0) >= 25 ? 'text-warning' : 'text-destructive'}`}>{previewRemaining}</span> pts
+                      </span>
+                    </div>
+                  )}
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -408,6 +507,9 @@ export default function Scores() {
                     Running Total
                   </th>
                   <th className="px-4 py-3 text-left text-sm font-semibold text-muted-foreground">
+                    Remaining
+                  </th>
+                  <th className="px-4 py-3 text-left text-sm font-semibold text-muted-foreground">
                     Date
                   </th>
                   <th className="px-4 py-3 text-left text-sm font-semibold text-muted-foreground">
@@ -443,6 +545,13 @@ export default function Scores() {
                       <span className="font-semibold text-primary">
                         {cumulativeMap[score.student_id] ?? 0}
                       </span>
+                    </td>
+                    <td className="px-4 py-4">
+                      {(() => {
+                        const r = remainingMap[score.student_id] ?? 100;
+                        const cls = r >= 50 ? 'text-success' : r >= 25 ? 'text-warning' : 'text-destructive';
+                        return <span className={`font-semibold ${cls}`}>{r} / 100</span>;
+                      })()}
                     </td>
                     <td className="px-4 py-4 text-sm text-muted-foreground">
                       {format(new Date(score.score_date), 'MMM d, yyyy')}
