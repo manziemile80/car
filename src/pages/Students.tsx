@@ -34,6 +34,7 @@ interface StudentWithClass extends Student {
   class?: Class | null;
   student_parents?: LinkedParent[];
   cumulative_score?: number;
+  remaining_marks?: number;
   entries_count?: number;
 }
 
@@ -84,11 +85,12 @@ export default function Students() {
       ]);
 
       if (studentsRes.data) {
-        const cumMap = new Map<string, { cumulative_score: number; entries_count: number }>();
+        const cumMap = new Map<string, { cumulative_score: number; remaining_marks: number; entries_count: number }>();
         if (cumRes && (cumRes as any).data) {
           for (const row of (cumRes as any).data as any[]) {
             cumMap.set(row.student_id, {
               cumulative_score: row.cumulative_score ?? 0,
+              remaining_marks: row.remaining_marks ?? 100,
               entries_count: row.entries_count ?? 0,
             });
           }
@@ -96,6 +98,7 @@ export default function Students() {
         const merged = (studentsRes.data as StudentWithClass[]).map((s) => ({
           ...s,
           cumulative_score: cumMap.get(s.id)?.cumulative_score ?? 0,
+          remaining_marks: cumMap.get(s.id)?.remaining_marks ?? 100,
           entries_count: cumMap.get(s.id)?.entries_count ?? 0,
         }));
         setStudents(merged);
@@ -384,6 +387,14 @@ export default function Students() {
                           ({student.entries_count ?? 0} entries)
                         </span>
                       </span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-muted-foreground">Remaining Marks</span>
+                      {(() => {
+                        const r = student.remaining_marks ?? 100;
+                        const cls = r >= 50 ? 'text-success' : r >= 25 ? 'text-warning' : 'text-destructive';
+                        return <span className={`font-bold ${cls}`}>{r} / 100</span>;
+                      })()}
                     </div>
                   </div>
                   <Button
