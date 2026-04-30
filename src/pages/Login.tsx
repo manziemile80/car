@@ -52,7 +52,7 @@ export default function Login() {
               <Shield className="h-7 w-7 text-primary-foreground" />
             </div>
             <div>
-              <h1 className="text-2xl font-bold text-foreground">Conduct</h1>
+              <h1 className="text-2xl font-bold text-foreground">College De Rebero</h1>
               <p className="text-sm text-muted-foreground">Behavior Management System</p>
             </div>
           </div>
