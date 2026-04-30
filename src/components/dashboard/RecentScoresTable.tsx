@@ -1,6 +1,8 @@
 import { format } from 'date-fns';
 import { ScoreBadge } from './ScoreBadge';
 import { BehaviorScoreWithDetails, BehaviorCategory } from '@/types/database';
+import { useEffect, useState } from 'react';
+import { supabase } from '@/integrations/supabase/client';
 
 interface RecentScoresTableProps {
   scores: BehaviorScoreWithDetails[];
@@ -15,6 +17,21 @@ const categoryLabels: Record<BehaviorCategory, string> = {
 };
 
 export function RecentScoresTable({ scores, loading }: RecentScoresTableProps) {
+  const [remainingMap, setRemainingMap] = useState<Record<string, number>>({});
+
+  useEffect(() => {
+    (async () => {
+      const { data } = await supabase.from('student_cumulative_scores' as any).select('*');
+      if (data) {
+        const map: Record<string, number> = {};
+        for (const row of data as any[]) {
+          map[row.student_id] = row.remaining_marks ?? 100;
+        }
+        setRemainingMap(map);
+      }
+    })();
+  }, [scores]);
+
   if (loading) {
     return (
       <div className="animate-pulse space-y-3">
@@ -48,6 +65,9 @@ export function RecentScoresTable({ scores, loading }: RecentScoresTableProps) {
               Score
             </th>
             <th className="px-4 py-3 text-left text-sm font-semibold text-muted-foreground">
+              Remaining
+            </th>
+            <th className="px-4 py-3 text-left text-sm font-semibold text-muted-foreground">
               Date
             </th>
           </tr>
@@ -72,6 +92,13 @@ export function RecentScoresTable({ scores, loading }: RecentScoresTableProps) {
               </td>
               <td className="px-4 py-4">
                 <ScoreBadge score={score.score} />
+              </td>
+              <td className="px-4 py-4">
+                {(() => {
+                  const r = remainingMap[score.student_id] ?? 100;
+                  const cls = r >= 50 ? 'text-success' : r >= 25 ? 'text-warning' : 'text-destructive';
+                  return <span className={`font-semibold ${cls}`}>{r}/100</span>;
+                })()}
               </td>
               <td className="px-4 py-4 text-sm text-muted-foreground">
                 {format(new Date(score.score_date), 'MMM d, yyyy')}
