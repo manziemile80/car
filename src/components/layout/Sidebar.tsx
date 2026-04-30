@@ -1,5 +1,6 @@
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
+import { useTheme } from '@/contexts/ThemeContext';
 import { cn } from '@/lib/utils';
 import {
   LayoutDashboard,
@@ -14,6 +15,8 @@ import {
   BookOpen,
   Menu,
   X,
+  Sun,
+  Moon,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useState, useEffect } from 'react';
@@ -39,6 +42,7 @@ const navItems: NavItem[] = [
 
 export function Sidebar() {
   const { role, profile, signOut } = useAuth();
+  const { theme, toggleTheme } = useTheme();
   const location = useLocation();
   const [mobileOpen, setMobileOpen] = useState(false);
 
@@ -118,6 +122,15 @@ export function Sidebar() {
       <div className="border-t border-sidebar-border p-4">
         <Button
           variant="ghost"
+          onClick={toggleTheme}
+          className="w-full justify-start gap-3 text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground mb-1"
+          aria-label="Toggle theme"
+        >
+          {theme === 'dark' ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
+          {theme === 'dark' ? 'Light Mode' : 'Dark Mode'}
+        </Button>
+        <Button
+          variant="ghost"
           onClick={signOut}
           className="w-full justify-start gap-3 text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground"
         >
@@ -138,7 +151,11 @@ export function Sidebar() {
           </div>
           <span className="text-base font-bold text-foreground">College De Rebero</span>
         </div>
-        <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
+        <div className="flex items-center gap-1">
+          <Button variant="ghost" size="icon" onClick={toggleTheme} aria-label="Toggle theme">
+            {theme === 'dark' ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
+          </Button>
+          <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
           <SheetTrigger asChild>
             <Button variant="ghost" size="icon" aria-label="Open menu">
               <Menu className="h-5 w-5" />
@@ -149,7 +166,8 @@ export function Sidebar() {
               <SidebarContent />
             </div>
           </SheetContent>
-        </Sheet>
+          </Sheet>
+        </div>
       </div>
 
       {/* Desktop sidebar */}
