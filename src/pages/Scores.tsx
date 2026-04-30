@@ -507,6 +507,9 @@ export default function Scores() {
                     Running Total
                   </th>
                   <th className="px-4 py-3 text-left text-sm font-semibold text-muted-foreground">
+                    Remaining
+                  </th>
+                  <th className="px-4 py-3 text-left text-sm font-semibold text-muted-foreground">
                     Date
                   </th>
                   <th className="px-4 py-3 text-left text-sm font-semibold text-muted-foreground">
@@ -542,6 +545,13 @@ export default function Scores() {
                       <span className="font-semibold text-primary">
                         {cumulativeMap[score.student_id] ?? 0}
                       </span>
+                    </td>
+                    <td className="px-4 py-4">
+                      {(() => {
+                        const r = remainingMap[score.student_id] ?? 100;
+                        const cls = r >= 50 ? 'text-success' : r >= 25 ? 'text-warning' : 'text-destructive';
+                        return <span className={`font-semibold ${cls}`}>{r} / 100</span>;
+                      })()}
                     </td>
                     <td className="px-4 py-4 text-sm text-muted-foreground">
                       {format(new Date(score.score_date), 'MMM d, yyyy')}
