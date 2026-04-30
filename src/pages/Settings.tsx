@@ -140,10 +140,6 @@ export default function Settings() {
                     Connected
                   </span>
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Provider</span>
-                  <span className="font-medium">Lovable Cloud</span>
-                </div>
               </div>
             </CardContent>
           </Card>

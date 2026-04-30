@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { StatCard } from '@/components/dashboard/StatCard';
 import { RecentScoresTable } from '@/components/dashboard/RecentScoresTable';
@@ -150,33 +151,39 @@ export default function Dashboard() {
         {/* Quick Actions for Admin/Teacher */}
         {(role === 'admin' || role === 'teacher') && (
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            <Card className="border-dashed border-2 hover:border-primary/50 hover:bg-muted/50 transition-all cursor-pointer">
-              <CardContent className="flex flex-col items-center justify-center py-8">
-                <ClipboardList className="h-10 w-10 text-muted-foreground mb-3" />
-                <h3 className="font-semibold text-foreground">Record Score</h3>
-                <p className="text-sm text-muted-foreground text-center mt-1">
-                  Add a new behavior score for a student
-                </p>
-              </CardContent>
-            </Card>
-            <Card className="border-dashed border-2 hover:border-primary/50 hover:bg-muted/50 transition-all cursor-pointer">
-              <CardContent className="flex flex-col items-center justify-center py-8">
-                <GraduationCap className="h-10 w-10 text-muted-foreground mb-3" />
-                <h3 className="font-semibold text-foreground">Add Student</h3>
-                <p className="text-sm text-muted-foreground text-center mt-1">
-                  Register a new student in the system
-                </p>
-              </CardContent>
-            </Card>
-            <Card className="border-dashed border-2 hover:border-primary/50 hover:bg-muted/50 transition-all cursor-pointer">
-              <CardContent className="flex flex-col items-center justify-center py-8">
-                <TrendingUp className="h-10 w-10 text-muted-foreground mb-3" />
-                <h3 className="font-semibold text-foreground">View Reports</h3>
-                <p className="text-sm text-muted-foreground text-center mt-1">
-                  Generate and view behavior reports
-                </p>
-              </CardContent>
-            </Card>
+            <Link to="/scores?action=new">
+              <Card className="border-dashed border-2 hover:border-primary/50 hover:bg-muted/50 transition-all cursor-pointer h-full">
+                <CardContent className="flex flex-col items-center justify-center py-8">
+                  <ClipboardList className="h-10 w-10 text-muted-foreground mb-3" />
+                  <h3 className="font-semibold text-foreground">Record Score</h3>
+                  <p className="text-sm text-muted-foreground text-center mt-1">
+                    Add a new behavior score for a student
+                  </p>
+                </CardContent>
+              </Card>
+            </Link>
+            <Link to="/students?action=new">
+              <Card className="border-dashed border-2 hover:border-primary/50 hover:bg-muted/50 transition-all cursor-pointer h-full">
+                <CardContent className="flex flex-col items-center justify-center py-8">
+                  <GraduationCap className="h-10 w-10 text-muted-foreground mb-3" />
+                  <h3 className="font-semibold text-foreground">Add Student</h3>
+                  <p className="text-sm text-muted-foreground text-center mt-1">
+                    Register a new student in the system
+                  </p>
+                </CardContent>
+              </Card>
+            </Link>
+            <Link to="/reports">
+              <Card className="border-dashed border-2 hover:border-primary/50 hover:bg-muted/50 transition-all cursor-pointer h-full">
+                <CardContent className="flex flex-col items-center justify-center py-8">
+                  <TrendingUp className="h-10 w-10 text-muted-foreground mb-3" />
+                  <h3 className="font-semibold text-foreground">View Reports</h3>
+                  <p className="text-sm text-muted-foreground text-center mt-1">
+                    Generate and view behavior reports
+                  </p>
+                </CardContent>
+              </Card>
+            </Link>
           </div>
         )}
       </div>
