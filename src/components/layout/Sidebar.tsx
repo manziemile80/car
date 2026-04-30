@@ -70,7 +70,7 @@ export function Sidebar() {
         <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-sidebar-primary">
           <Shield className="h-5 w-5 text-sidebar-primary-foreground" />
         </div>
-        <span className="text-lg font-bold text-sidebar-foreground">Conduct</span>
+        <span className="text-lg font-bold text-sidebar-foreground">College De Rebero</span>
       </div>
 
       {/* User info */}
@@ -136,7 +136,7 @@ export function Sidebar() {
           <div className="flex h-8 w-8 items-center justify-center rounded-md bg-primary">
             <Shield className="h-4 w-4 text-primary-foreground" />
           </div>
-          <span className="text-base font-bold text-foreground">Conduct</span>
+          <span className="text-base font-bold text-foreground">College De Rebero</span>
         </div>
         <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
           <SheetTrigger asChild>

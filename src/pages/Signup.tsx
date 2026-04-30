@@ -67,7 +67,7 @@ export default function Signup() {
               <Shield className="h-7 w-7 text-primary-foreground" />
             </div>
             <div>
-              <h1 className="text-2xl font-bold text-foreground">Conduct</h1>
+              <h1 className="text-2xl font-bold text-foreground">College De Rebero</h1>
               <p className="text-sm text-muted-foreground">Behavior Management System</p>
             </div>
           </div>
@@ -77,7 +77,7 @@ export default function Signup() {
             <div>
               <h2 className="text-2xl font-semibold text-foreground">Create an account</h2>
               <p className="mt-2 text-muted-foreground">
-                Get started with Conduct today
+                Get started with College De Rebero today
               </p>
             </div>
 

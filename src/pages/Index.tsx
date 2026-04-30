@@ -27,7 +27,7 @@ export default function Index() {
             <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary-foreground/20">
               <Shield className="h-6 w-6 text-primary-foreground" />
             </div>
-            <span className="text-xl font-bold text-primary-foreground">Conduct</span>
+            <span className="text-xl font-bold text-primary-foreground">College De Rebero</span>
           </div>
           <div className="flex items-center gap-4">
             <Link to="/login">
@@ -125,7 +125,7 @@ export default function Index() {
         <div className="container mx-auto px-4 text-center">
           <h2 className="text-3xl font-bold text-foreground">Ready to Get Started?</h2>
           <p className="mt-4 text-lg text-muted-foreground">
-            Join hundreds of schools already using Conduct to manage student behavior
+            Join hundreds of schools already using College De Rebero to manage student behavior
           </p>
           <Link to="/signup" className="mt-8 inline-block">
             <Button size="lg">Create Your Account</Button>
@@ -136,7 +136,7 @@ export default function Index() {
       {/* Footer */}
       <footer className="border-t border-border py-8">
         <div className="container mx-auto px-4 text-center text-sm text-muted-foreground">
-          <p>© 2026 Conduct. All rights reserved.</p>
+          <p>© 2026 College De Rebero. All rights reserved.</p>
         </div>
       </footer>
     </div>
