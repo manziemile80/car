@@ -394,14 +394,36 @@ export default function Scores() {
                       {scoreMode === 'deduct' ? '-' : '+'}{Math.abs(score[0])}
                     </span>
                   </div>
-                  <Slider
-                    value={score}
-                    onValueChange={setScore}
-                    min={1}
-                    max={100}
-                    step={1}
-                    className="w-full"
-                  />
+                  <div className="flex items-center gap-3">
+                    <Slider
+                      value={score}
+                      onValueChange={setScore}
+                      min={1}
+                      max={100}
+                      step={1}
+                      className="flex-1"
+                    />
+                    <Input
+                      type="number"
+                      min={1}
+                      max={100}
+                      value={score[0]}
+                      onChange={(e) => {
+                        const raw = parseInt(e.target.value, 10);
+                        if (Number.isNaN(raw)) {
+                          setScore([1]);
+                          return;
+                        }
+                        const clamped = Math.max(1, Math.min(100, raw));
+                        setScore([clamped]);
+                      }}
+                      className="w-20 text-center"
+                      aria-label="Marks"
+                    />
+                  </div>
+                  <p className="text-[11px] text-muted-foreground">
+                    Drag the slider or type marks (1–100) directly.
+                  </p>
                   {selectedStudent && (
                     <div className="flex items-center justify-between rounded-md bg-muted/60 px-3 py-2 text-xs">
                       <span className="text-muted-foreground">
