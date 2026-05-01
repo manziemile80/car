@@ -81,6 +81,7 @@ export default function Scores() {
   const [category, setCategory] = useState<BehaviorCategory>('discipline');
   const [scoreMode, setScoreMode] = useState<'add' | 'deduct'>('add');
   const [score, setScore] = useState([10]);
+  const MAX_SCORE = 40;
   const [notes, setNotes] = useState('');
   const [scoreDate, setScoreDate] = useState(format(new Date(), 'yyyy-MM-dd'));
 
@@ -130,7 +131,13 @@ export default function Scores() {
     setFormLoading(true);
 
     try {
-      const finalScore = scoreMode === 'deduct' ? -Math.abs(score[0]) : Math.abs(score[0]);
+      const absScore = Math.min(Math.abs(score[0]), MAX_SCORE);
+      if (Math.abs(score[0]) > MAX_SCORE) {
+        toast.error(`Score cannot exceed ${MAX_SCORE}/${MAX_SCORE}`);
+        setFormLoading(false);
+        return;
+      }
+      const finalScore = scoreMode === 'deduct' ? -absScore : absScore;
       const { data: scoreData, error } = await supabase.from('behavior_scores').insert({
         student_id: selectedStudent,
         teacher_id: user.id,
@@ -399,14 +406,14 @@ export default function Scores() {
                       value={score}
                       onValueChange={setScore}
                       min={1}
-                      max={100}
+                      max={MAX_SCORE}
                       step={1}
                       className="flex-1"
                     />
                     <Input
                       type="number"
                       min={1}
-                      max={100}
+                      max={MAX_SCORE}
                       value={score[0]}
                       onChange={(e) => {
                         const raw = parseInt(e.target.value, 10);
@@ -414,7 +421,7 @@ export default function Scores() {
                           setScore([1]);
                           return;
                         }
-                        const clamped = Math.max(1, Math.min(100, raw));
+                        const clamped = Math.max(1, Math.min(MAX_SCORE, raw));
                         setScore([clamped]);
                       }}
                       className="w-20 text-center"
@@ -422,7 +429,7 @@ export default function Scores() {
                     />
                   </div>
                   <p className="text-[11px] text-muted-foreground">
-                    Drag the slider or type marks (1–100) directly.
+                    Drag the slider or type marks (1–{MAX_SCORE}). Max is {MAX_SCORE}/{MAX_SCORE}.
                   </p>
                   {selectedStudent && (
                     <div className="flex items-center justify-between rounded-md bg-muted/60 px-3 py-2 text-xs">
