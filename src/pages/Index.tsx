@@ -2,6 +2,8 @@ import { Link, Navigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Shield, GraduationCap, Bell, BarChart3, CheckCircle, Loader2 } from 'lucide-react';
+import landingStudents from '@/assets/landing-students.jpg';
+import landingSchool from '@/assets/landing-school.jpg';
 
 export default function Index() {
   const { user, loading } = useAuth();
@@ -21,8 +23,29 @@ export default function Index() {
   return (
     <div className="min-h-screen bg-background">
       {/* Hero Section */}
-      <div className="hero-gradient">
-        <nav className="container mx-auto flex items-center justify-between py-6 px-4">
+      <div className="relative overflow-hidden hero-gradient">
+        {/* Animated background images */}
+        <div className="pointer-events-none absolute inset-0 z-0">
+          <img
+            src={landingStudents}
+            alt="Students at College De Rebero"
+            width={1920}
+            height={1088}
+            className="absolute inset-0 h-full w-full object-cover opacity-0 animate-hero-bg-1 will-change-transform"
+          />
+          <img
+            src={landingSchool}
+            alt="College De Rebero campus"
+            width={1920}
+            height={1088}
+            loading="lazy"
+            className="absolute inset-0 h-full w-full object-cover opacity-0 animate-hero-bg-2 will-change-transform"
+          />
+          {/* Dark overlay for text contrast */}
+          <div className="absolute inset-0 bg-gradient-to-b from-primary/80 via-primary/70 to-primary/85" />
+        </div>
+
+        <nav className="container relative z-10 mx-auto flex items-center justify-between py-6 px-4">
           <div className="flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary-foreground/20">
               <Shield className="h-6 w-6 text-primary-foreground" />
@@ -43,7 +66,7 @@ export default function Index() {
           </div>
         </nav>
 
-        <div className="container mx-auto px-4 py-20 text-center">
+        <div className="container relative z-10 mx-auto px-4 py-20 text-center">
           <h1 className="text-5xl font-bold tracking-tight text-primary-foreground md:text-6xl">
             Student Behavior
             <br />
