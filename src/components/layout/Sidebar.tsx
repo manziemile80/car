@@ -17,6 +17,9 @@ import {
   X,
   Sun,
   Moon,
+  FileText,
+  CalendarCheck,
+  Pencil,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useState, useEffect } from 'react';
@@ -33,8 +36,12 @@ const navItems: NavItem[] = [
   { label: 'Dashboard', href: '/dashboard', icon: LayoutDashboard, roles: ['admin', 'teacher', 'parent', 'viewer'] },
   { label: 'Students', href: '/students', icon: GraduationCap, roles: ['admin', 'teacher', 'viewer'] },
   { label: 'Classes', href: '/classes', icon: BookOpen, roles: ['admin', 'teacher', 'viewer'] },
+  { label: 'Subjects', href: '/subjects', icon: BookOpen, roles: ['admin', 'teacher', 'viewer'] },
   { label: 'Parents', href: '/parents', icon: UserCheck, roles: ['admin'] },
   { label: 'Behavior Scores', href: '/scores', icon: ClipboardList, roles: ['admin', 'teacher', 'viewer'] },
+  { label: 'Marks Entry', href: '/marks', icon: Pencil, roles: ['admin', 'teacher', 'viewer'] },
+  { label: 'Attendance', href: '/attendance', icon: CalendarCheck, roles: ['admin', 'teacher', 'viewer'] },
+  { label: 'Academic Reports', href: '/academic-reports', icon: FileText, roles: ['admin', 'teacher', 'parent', 'viewer'] },
   { label: 'Reports', href: '/reports', icon: BarChart3, roles: ['admin', 'teacher', 'parent', 'viewer'] },
   { label: 'Users', href: '/users', icon: Users, roles: ['admin'] },
   { label: 'Settings', href: '/settings', icon: Settings, roles: ['admin'] },

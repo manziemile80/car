@@ -17,6 +17,10 @@ import Reports from "./pages/Reports";
 import Users from "./pages/Users";
 import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
+import Subjects from "./pages/Subjects";
+import Marks from "./pages/Marks";
+import Attendance from "./pages/Attendance";
+import AcademicReports from "./pages/AcademicReports";
 
 const queryClient = new QueryClient();
 
@@ -38,6 +42,10 @@ const App = () => (
             <Route path="/parents" element={<Parents />} />
             <Route path="/scores" element={<Scores />} />
             <Route path="/reports" element={<Reports />} />
+            <Route path="/subjects" element={<Subjects />} />
+            <Route path="/marks" element={<Marks />} />
+            <Route path="/attendance" element={<Attendance />} />
+            <Route path="/academic-reports" element={<AcademicReports />} />
             <Route path="/users" element={<Users />} />
             <Route path="/settings" element={<Settings />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
