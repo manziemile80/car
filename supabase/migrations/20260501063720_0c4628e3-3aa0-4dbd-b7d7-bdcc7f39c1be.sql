@@ -1,0 +1,2 @@
+ALTER TABLE public.behavior_scores DROP CONSTRAINT IF EXISTS behavior_scores_score_check;
+ALTER TABLE public.behavior_scores ADD CONSTRAINT behavior_scores_score_check CHECK (score >= -100 AND score <= 100);
