@@ -8,7 +8,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
-import { BookOpen, Loader2, Plus, Trash2 } from 'lucide-react';
+import { BookOpen, Loader2, Plus, Trash2, Pencil } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface Subject { id: string; name: string; code: string; description: string | null; }
@@ -20,8 +20,9 @@ export default function Subjects() {
   const [open, setOpen] = useState(false);
   const [saving, setSaving] = useState(false);
   const [form, setForm] = useState({ name: '', code: '', description: '' });
+  const [editingId, setEditingId] = useState<string | null>(null);
 
-  const isAdmin = role === 'admin';
+  const canManage = role === 'admin' || role === 'teacher';
 
   useEffect(() => { fetchSubjects(); }, []);
 
@@ -33,19 +34,35 @@ export default function Subjects() {
     setLoading(false);
   };
 
+  const openCreate = () => {
+    setEditingId(null);
+    setForm({ name: '', code: '', description: '' });
+    setOpen(true);
+  };
+
+  const openEdit = (s: Subject) => {
+    setEditingId(s.id);
+    setForm({ name: s.name, code: s.code, description: s.description || '' });
+    setOpen(true);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!form.name.trim() || !form.code.trim()) return toast.error('Name and code required');
     setSaving(true);
-    const { error } = await supabase.from('subjects').insert({
+    const payload = {
       name: form.name.trim(),
       code: form.code.trim().toUpperCase(),
       description: form.description.trim() || null,
-    });
+    };
+    const { error } = editingId
+      ? await supabase.from('subjects').update(payload).eq('id', editingId)
+      : await supabase.from('subjects').insert(payload);
     setSaving(false);
     if (error) return toast.error(error.message);
-    toast.success('Subject created');
+    toast.success(editingId ? 'Subject updated' : 'Subject created');
     setOpen(false);
+    setEditingId(null);
     setForm({ name: '', code: '', description: '' });
     fetchSubjects();
   };
@@ -66,13 +83,13 @@ export default function Subjects() {
             <h1 className="text-2xl sm:text-3xl font-bold text-foreground">Subjects</h1>
             <p className="mt-1 text-sm text-muted-foreground">Manage academic subjects offered at the school</p>
           </div>
-          {isAdmin && (
+          {canManage && (
             <Dialog open={open} onOpenChange={setOpen}>
               <DialogTrigger asChild>
-                <Button><Plus className="h-4 w-4" /> Add Subject</Button>
+                <Button onClick={openCreate}><Plus className="h-4 w-4" /> Add Subject</Button>
               </DialogTrigger>
               <DialogContent>
-                <DialogHeader><DialogTitle>New Subject</DialogTitle></DialogHeader>
+                <DialogHeader><DialogTitle>{editingId ? 'Edit Subject' : 'New Subject'}</DialogTitle></DialogHeader>
                 <form onSubmit={handleSubmit} className="space-y-4">
                   <div className="space-y-2">
                     <Label>Subject Name</Label>
@@ -87,7 +104,7 @@ export default function Subjects() {
                     <Input value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} />
                   </div>
                   <Button type="submit" disabled={saving} className="w-full">
-                    {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Create'}
+                    {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : (editingId ? 'Update' : 'Create')}
                   </Button>
                 </form>
               </DialogContent>
@@ -109,7 +126,7 @@ export default function Subjects() {
                     <TableHead>Name</TableHead>
                     <TableHead>Code</TableHead>
                     <TableHead>Description</TableHead>
-                    {isAdmin && <TableHead className="w-20">Actions</TableHead>}
+                    {canManage && <TableHead className="w-28">Actions</TableHead>}
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -118,11 +135,16 @@ export default function Subjects() {
                       <TableCell className="font-medium">{s.name}</TableCell>
                       <TableCell><span className="rounded bg-muted px-2 py-1 text-xs font-mono">{s.code}</span></TableCell>
                       <TableCell className="text-muted-foreground">{s.description || '-'}</TableCell>
-                      {isAdmin && (
+                      {canManage && (
                         <TableCell>
-                          <Button variant="ghost" size="icon" onClick={() => handleDelete(s.id)}>
-                            <Trash2 className="h-4 w-4 text-destructive" />
-                          </Button>
+                          <div className="flex gap-1">
+                            <Button variant="ghost" size="icon" onClick={() => openEdit(s)} aria-label="Edit subject">
+                              <Pencil className="h-4 w-4" />
+                            </Button>
+                            <Button variant="ghost" size="icon" onClick={() => handleDelete(s.id)} aria-label="Delete subject">
+                              <Trash2 className="h-4 w-4 text-destructive" />
+                            </Button>
+                          </div>
                         </TableCell>
                       )}
                     </TableRow>
