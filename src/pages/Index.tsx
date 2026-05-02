@@ -1,9 +1,10 @@
 import { Link, Navigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
-import { Shield, GraduationCap, Bell, BarChart3, CheckCircle, Loader2 } from 'lucide-react';
+import { GraduationCap, Bell, BarChart3, CheckCircle, Loader2 } from 'lucide-react';
 import landingStudents from '@/assets/landing-students.jpg';
 import landingSchool from '@/assets/landing-school.jpg';
+import schoolLogo from '@/assets/college-rebero-logo.png';
 
 export default function Index() {
   const { user, loading } = useAuth();
@@ -41,20 +42,18 @@ export default function Index() {
             loading="lazy"
             className="absolute inset-0 h-full w-full object-cover opacity-0 animate-hero-bg-2 will-change-transform"
           />
-          {/* Dark overlay for text contrast */}
-          <div className="absolute inset-0 bg-gradient-to-b from-primary/80 via-primary/70 to-primary/85" />
+          {/* Lighter overlay so animated images stay visible while keeping text contrast */}
+          <div className="absolute inset-0 bg-gradient-to-b from-primary/45 via-primary/30 to-primary/55" />
         </div>
 
         <nav className="container relative z-10 mx-auto flex items-center justify-between py-6 px-4">
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary-foreground/20">
-              <Shield className="h-6 w-6 text-primary-foreground" />
-            </div>
-            <span className="text-xl font-bold text-primary-foreground">College De Rebero</span>
+            <img src={schoolLogo} alt="College De Rebero logo" width={48} height={48} className="h-12 w-12 drop-shadow" />
+            <span className="text-xl font-bold text-primary-foreground drop-shadow">College De Rebero</span>
           </div>
           <div className="flex items-center gap-4">
             <Link to="/login">
-              <Button variant="ghost" className="text-primary-foreground hover:bg-primary-foreground/10">
+              <Button variant="ghost" className="text-primary-foreground hover:bg-primary-foreground/20">
                 Sign In
               </Button>
             </Link>
@@ -67,12 +66,12 @@ export default function Index() {
         </nav>
 
         <div className="container relative z-10 mx-auto px-4 py-20 text-center">
-          <h1 className="text-5xl font-bold tracking-tight text-primary-foreground md:text-6xl">
+          <h1 className="text-5xl font-bold tracking-tight text-primary-foreground md:text-6xl drop-shadow-lg">
             Student Behavior
             <br />
             Management Made Easy
           </h1>
-          <p className="mx-auto mt-6 max-w-2xl text-lg text-primary-foreground/80">
+          <p className="mx-auto mt-6 max-w-2xl text-lg text-primary-foreground/95 drop-shadow">
             Empower teachers to track student behavior, engage parents with instant notifications,
             and foster a positive learning environment with our comprehensive system.
           </p>
