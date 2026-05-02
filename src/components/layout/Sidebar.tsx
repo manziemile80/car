@@ -11,7 +11,6 @@ import {
   BarChart3,
   Settings,
   LogOut,
-  Shield,
   BookOpen,
   Menu,
   X,
@@ -24,6 +23,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { useState, useEffect } from 'react';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
+import schoolLogo from '@/assets/college-rebero-logo.png';
 
 interface NavItem {
   label: string;
@@ -78,9 +78,7 @@ export function Sidebar() {
     <>
       {/* Logo */}
       <div className="flex h-16 items-center gap-3 border-b border-sidebar-border px-6">
-        <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-sidebar-primary">
-          <Shield className="h-5 w-5 text-sidebar-primary-foreground" />
-        </div>
+        <img src={schoolLogo} alt="College De Rebero" width={36} height={36} className="h-9 w-9 object-contain" />
         <span className="text-lg font-bold text-sidebar-foreground">College De Rebero</span>
       </div>
 
@@ -153,9 +151,7 @@ export function Sidebar() {
       {/* Mobile top bar */}
       <div className="lg:hidden fixed top-0 left-0 right-0 z-40 flex h-14 items-center justify-between border-b border-border bg-background px-4">
         <div className="flex items-center gap-2">
-          <div className="flex h-8 w-8 items-center justify-center rounded-md bg-primary">
-            <Shield className="h-4 w-4 text-primary-foreground" />
-          </div>
+          <img src={schoolLogo} alt="College De Rebero" width={32} height={32} className="h-8 w-8 object-contain" />
           <span className="text-base font-bold text-foreground">College De Rebero</span>
         </div>
         <div className="flex items-center gap-1">
