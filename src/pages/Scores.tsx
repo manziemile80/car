@@ -490,7 +490,7 @@ export default function Scores() {
               </form>
             </DialogContent>
           </Dialog>
-          </div>
+          </div>)}
         </div>
 
         {/* Search */}
