@@ -12,6 +12,7 @@ import { FileText, Loader2, Download, Search, Users } from 'lucide-react';
 import { toast } from 'sonner';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
+import schoolLogo from '@/assets/college-rebero-logo.png';
 
 interface Student { id: string; first_name: string; last_name: string; student_id: string; class_id: string | null; date_of_birth: string | null; }
 interface ClassRow { id: string; name: string; grade_level: string; academic_year: string; }
@@ -42,6 +43,20 @@ export default function AcademicReports() {
   const [search, setSearch] = useState('');
   const [loading, setLoading] = useState(false);
   const [generating, setGenerating] = useState<string | null>(null);
+  const [logoData, setLogoData] = useState<string | null>(null);
+
+  useEffect(() => {
+    // Preload logo as data URL for jsPDF
+    fetch(schoolLogo)
+      .then((r) => r.blob())
+      .then((blob) => new Promise<string>((res) => {
+        const reader = new FileReader();
+        reader.onloadend = () => res(reader.result as string);
+        reader.readAsDataURL(blob);
+      }))
+      .then(setLogoData)
+      .catch(() => setLogoData(null));
+  }, []);
 
   useEffect(() => {
     (async () => {
@@ -97,15 +112,25 @@ export default function AcademicReports() {
     const pageW = doc.internal.pageSize.getWidth();
     const pageH = doc.internal.pageSize.getHeight();
 
+    // School logo (top-left)
+    if (logoData) {
+      try { doc.addImage(logoData, 'PNG', 10, 6, 18, 18); } catch (_) { /* ignore */ }
+    }
+    // School name header
+    doc.setFont('helvetica', 'bold'); doc.setFontSize(14);
+    doc.text('COLLEGE DE REBERO', pageW / 2, 10, { align: 'center' });
+    doc.setFont('helvetica', 'normal'); doc.setFontSize(9);
+    doc.text('Excellence in Education • Rwanda', pageW / 2, 15, { align: 'center' });
+
     // Title bar
     doc.setDrawColor(0); doc.setLineWidth(0.5);
-    doc.rect(pageW / 2 - 60, 10, 120, 10);
-    doc.setFont('helvetica', 'bold'); doc.setFontSize(13);
-    doc.text("STUDENT'S ASSESSMENT REPORT", pageW / 2, 17, { align: 'center' });
+    doc.rect(pageW / 2 - 60, 19, 120, 8);
+    doc.setFont('helvetica', 'bold'); doc.setFontSize(12);
+    doc.text("STUDENT'S ASSESSMENT REPORT", pageW / 2, 24.5, { align: 'center' });
 
     // School info table
     autoTable(doc, {
-      startY: 24,
+      startY: 30,
       theme: 'grid',
       styles: { fontSize: 9, cellPadding: 1.5, textColor: 0, lineColor: 0, lineWidth: 0.2 },
       body: [
@@ -182,13 +207,19 @@ export default function AcademicReports() {
     doc.text(`Done at College De Rebero, on ${new Date().toLocaleDateString()}`, 14, y);
     y += 14;
     doc.line(14, y, 80, y);
+    doc.line(pageW / 2 - 33, y, pageW / 2 + 33, y);
     doc.line(pageW - 80, y, pageW - 14, y);
     doc.setFontSize(9);
     doc.text('Class Teacher', 14, y + 5);
+    doc.text('Director of Studies', pageW / 2, y + 5, { align: 'center' });
     doc.text('School Manager', pageW - 80, y + 5);
 
-    doc.setFontSize(8); doc.setTextColor(120);
-    doc.text(`College Report Manager • Generated ${new Date().toLocaleString()}`, pageW / 2, pageH - 8, { align: 'center' });
+    // Footer
+    doc.setDrawColor(150); doc.setLineWidth(0.2);
+    doc.line(10, pageH - 14, pageW - 10, pageH - 14);
+    doc.setFontSize(8); doc.setTextColor(100);
+    doc.text('College De Rebero • P.O. Box 000 Kigali, Rwanda • Tel: +250 000 000 000 • info@collegederebero.rw', pageW / 2, pageH - 9, { align: 'center' });
+    doc.text(`College Report Manager • Generated on ${new Date().toLocaleString()} • This is a computer-generated document.`, pageW / 2, pageH - 5, { align: 'center' });
     doc.setTextColor(0);
   };
 

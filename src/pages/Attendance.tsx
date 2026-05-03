@@ -10,6 +10,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { CalendarCheck, Loader2, Save, Search } from 'lucide-react';
 import { toast } from 'sonner';
+import { format } from 'date-fns';
 
 interface Student { id: string; first_name: string; last_name: string; student_id: string; }
 interface ClassRow { id: string; name: string; }
@@ -111,7 +112,15 @@ export default function Attendance() {
           <Card>
             <CardHeader>
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-                <CardTitle>Roll Call — {date}</CardTitle>
+                <div>
+                  <CardTitle className="text-lg">Roll Call</CardTitle>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    📅 Attendance taken on{' '}
+                    <span className="font-semibold text-foreground">
+                      {format(new Date(date), 'EEEE, MMMM d, yyyy')}
+                    </span>
+                  </p>
+                </div>
                 <div className="flex gap-2 flex-wrap items-center">
                   <span className="text-sm text-muted-foreground">P:{summary.present} A:{summary.absent} L:{summary.late} E:{summary.excused}</span>
                   <div className="relative">
