@@ -169,6 +169,7 @@ export default function Parents() {
               Manage parent contacts and student relationships
             </p>
           </div>
+          {canManage && (
           <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
             <DialogTrigger asChild>
               <Button size="sm" className="w-full sm:w-auto">
@@ -237,6 +238,7 @@ export default function Parents() {
               </form>
             </DialogContent>
           </Dialog>
+          )}
         </div>
 
         {/* Search */}
