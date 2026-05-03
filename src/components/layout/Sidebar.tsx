@@ -33,7 +33,7 @@ interface NavItem {
 }
 
 const navItems: NavItem[] = [
-  { label: 'Dashboard', href: '/dashboard', icon: LayoutDashboard, roles: ['admin', 'teacher', 'parent', 'viewer'] },
+  { label: 'Dashboard', href: '/dashboard', icon: LayoutDashboard, roles: ['admin'] },
   { label: 'Students', href: '/students', icon: GraduationCap, roles: ['admin', 'teacher', 'viewer'] },
   { label: 'Classes', href: '/classes', icon: BookOpen, roles: ['admin', 'teacher', 'viewer'] },
   { label: 'Subjects', href: '/subjects', icon: BookOpen, roles: ['admin', 'teacher', 'viewer'] },
