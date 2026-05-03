@@ -271,7 +271,7 @@ export default function Scores() {
               Record and manage student behavior assessments
             </p>
           </div>
-          <div className="flex flex-wrap gap-2">
+          {canManage && (<div className="flex flex-wrap gap-2">
             <Button variant="outline" size="sm" onClick={handleTestSms} disabled={testSmsLoading}>
               {testSmsLoading ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
