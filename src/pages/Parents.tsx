@@ -15,6 +15,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Parent, StudentParent, Student } from '@/types/database';
 import { Plus, Search, UserCheck, Loader2, Phone, Mail, Pencil } from 'lucide-react';
 import { toast } from 'sonner';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface ParentWithChildren extends Parent {
   children?: {
@@ -25,6 +26,8 @@ interface ParentWithChildren extends Parent {
 }
 
 export default function Parents() {
+  const { role } = useAuth();
+  const canManage = role === 'admin' || role === 'teacher';
   const [parents, setParents] = useState<ParentWithChildren[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
