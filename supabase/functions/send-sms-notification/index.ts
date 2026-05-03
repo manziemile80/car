@@ -103,20 +103,32 @@ const handler = async (req: Request): Promise<Response> => {
       }
 
       const childName = `${student.first_name} ${student.last_name}`;
+      const className = (student as any).class?.name || "N/A";
       const isDeduction = score < 0;
       const absScore = Math.abs(score);
       const remainingText = remainingMarks !== null ? `${remainingMarks}/100` : "N/A";
+      const action = isDeduction ? "DEDUCTED" : "AWARDED";
 
-      // Bilingual message: English + Kinyarwanda in a single SMS
-      const englishPart = isDeduction
-        ? `College de Rebero: Dear Parent, ${absScore} marks were deducted from your child ${childName} on ${date}. Remaining marks: ${remainingText}.`
-        : `College de Rebero: Dear Parent, ${absScore} marks were added for your child ${childName} on ${date}. Remaining marks: ${remainingText}.`;
+      // Clear, well-structured bilingual SMS
+      const englishPart =
+        `COLLEGE DE REBERO\n` +
+        `Dear Parent,\n` +
+        `Student: ${childName} (Class: ${className})\n` +
+        `Date: ${date}\n` +
+        `${absScore} conduct marks ${action}.\n` +
+        `Remaining marks: ${remainingText}.\n` +
+        `Thank you.`;
 
-      const kinyarwandaPart = isDeduction
-        ? `Mwiriwe! Umwana wanyu ${childName} yakuweho amanota ${absScore} ku itariki ${date}. Amanota asigaye: ${remainingText}.`
-        : `Mwiriwe! Umwana wanyu ${childName} yongereweho amanota ${absScore} ku itariki ${date}. Amanota asigaye: ${remainingText}.`;
+      const kinyarwandaPart =
+        `COLLEGE DE REBERO\n` +
+        `Mwiriwe Mubyeyi,\n` +
+        `Umwana: ${childName} (Ishuri: ${className})\n` +
+        `Itariki: ${date}\n` +
+        `Amanota ${absScore} ${isDeduction ? "yakuweho" : "yongereweho"}.\n` +
+        `Amanota asigaye: ${remainingText}.\n` +
+        `Murakoze.`;
 
-      const message = `${englishPart}\n\n${kinyarwandaPart}`;
+      const message = `${englishPart}\n\n---\n\n${kinyarwandaPart}`;
 
       let smsStatus = "pending";
       let errorMessage = null;
