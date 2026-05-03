@@ -54,7 +54,8 @@ const categories: BehaviorCategory[] = ['discipline', 'respect', 'attendance', '
 
 export default function Scores() {
   const [searchParams, setSearchParams] = useSearchParams();
-  const { user } = useAuth();
+  const { user, role } = useAuth();
+  const canManage = role === 'admin' || role === 'teacher';
   const [scores, setScores] = useState<BehaviorScoreWithDetails[]>([]);
   const [students, setStudents] = useState<StudentWithClass[]>([]);
   const [cumulativeMap, setCumulativeMap] = useState<Record<string, number>>({});
