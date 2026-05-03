@@ -310,7 +310,7 @@ export default function Parents() {
                       </div>
                     </div>
                   )}
-                  <Button
+                  {canManage && (<Button
                     variant="outline"
                     size="sm"
                     className="w-full mt-4"
@@ -318,7 +318,7 @@ export default function Parents() {
                   >
                     <Pencil className="h-4 w-4" />
                     Edit
-                  </Button>
+                  </Button>)}
                 </CardContent>
               </Card>
             ))}
