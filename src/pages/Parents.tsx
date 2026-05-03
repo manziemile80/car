@@ -15,6 +15,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Parent, StudentParent, Student } from '@/types/database';
 import { Plus, Search, UserCheck, Loader2, Phone, Mail, Pencil } from 'lucide-react';
 import { toast } from 'sonner';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface ParentWithChildren extends Parent {
   children?: {
@@ -25,6 +26,8 @@ interface ParentWithChildren extends Parent {
 }
 
 export default function Parents() {
+  const { role } = useAuth();
+  const canManage = role === 'admin' || role === 'teacher';
   const [parents, setParents] = useState<ParentWithChildren[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
@@ -166,6 +169,7 @@ export default function Parents() {
               Manage parent contacts and student relationships
             </p>
           </div>
+          {canManage && (
           <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
             <DialogTrigger asChild>
               <Button size="sm" className="w-full sm:w-auto">
@@ -234,6 +238,7 @@ export default function Parents() {
               </form>
             </DialogContent>
           </Dialog>
+          )}
         </div>
 
         {/* Search */}
@@ -305,7 +310,7 @@ export default function Parents() {
                       </div>
                     </div>
                   )}
-                  <Button
+                  {canManage && (<Button
                     variant="outline"
                     size="sm"
                     className="w-full mt-4"
@@ -313,7 +318,7 @@ export default function Parents() {
                   >
                     <Pencil className="h-4 w-4" />
                     Edit
-                  </Button>
+                  </Button>)}
                 </CardContent>
               </Card>
             ))}

@@ -18,7 +18,8 @@ import { Plus, Search, BookOpen, Loader2, Users } from 'lucide-react';
 import { toast } from 'sonner';
 
 export default function Classes() {
-  const { user } = useAuth();
+  const { user, role } = useAuth();
+  const canManage = role === 'admin' || role === 'teacher';
   const [classes, setClasses] = useState<Class[]>([]);
   const [studentCounts, setStudentCounts] = useState<Record<string, number>>({});
   const [loading, setLoading] = useState(true);
@@ -111,6 +112,7 @@ export default function Classes() {
               Manage class sections and assignments
             </p>
           </div>
+          {canManage && (
           <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
             <DialogTrigger asChild>
               <Button size="sm" className="w-full sm:w-auto">
@@ -171,6 +173,7 @@ export default function Classes() {
               </form>
             </DialogContent>
           </Dialog>
+          )}
         </div>
 
         {/* Search */}

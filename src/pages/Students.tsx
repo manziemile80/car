@@ -25,6 +25,7 @@ import { Plus, Search, GraduationCap, Loader2, Users, Pencil } from 'lucide-reac
 import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { LinkParentsDialog } from '@/components/students/LinkParentsDialog';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface LinkedParent extends StudentParent {
   parent?: Parent;
@@ -39,6 +40,8 @@ interface StudentWithClass extends Student {
 }
 
 export default function Students() {
+  const { role } = useAuth();
+  const canManage = role === 'admin' || role === 'teacher';
   const [searchParams, setSearchParams] = useSearchParams();
   const [students, setStudents] = useState<StudentWithClass[]>([]);
   const [classes, setClasses] = useState<Class[]>([]);
@@ -216,6 +219,7 @@ export default function Students() {
               Manage student records and information
             </p>
           </div>
+          {canManage && (
           <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
             <DialogTrigger asChild>
               <Button size="sm" className="w-full sm:w-auto">
@@ -300,6 +304,7 @@ export default function Students() {
               </form>
             </DialogContent>
           </Dialog>
+          )}
         </div>
 
         {/* Search */}
@@ -397,6 +402,7 @@ export default function Students() {
                       })()}
                     </div>
                   </div>
+                  {canManage && (<>
                   <Button
                     variant="outline"
                     size="sm"
@@ -415,6 +421,7 @@ export default function Students() {
                     <Pencil className="h-4 w-4" />
                     Edit
                   </Button>
+                  </>)}
                 </CardContent>
               </Card>
             ))}

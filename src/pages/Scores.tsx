@@ -54,7 +54,8 @@ const categories: BehaviorCategory[] = ['discipline', 'respect', 'attendance', '
 
 export default function Scores() {
   const [searchParams, setSearchParams] = useSearchParams();
-  const { user } = useAuth();
+  const { user, role } = useAuth();
+  const canManage = role === 'admin' || role === 'teacher';
   const [scores, setScores] = useState<BehaviorScoreWithDetails[]>([]);
   const [students, setStudents] = useState<StudentWithClass[]>([]);
   const [cumulativeMap, setCumulativeMap] = useState<Record<string, number>>({});
@@ -270,7 +271,7 @@ export default function Scores() {
               Record and manage student behavior assessments
             </p>
           </div>
-          <div className="flex flex-wrap gap-2">
+          {canManage && (<div className="flex flex-wrap gap-2">
             <Button variant="outline" size="sm" onClick={handleTestSms} disabled={testSmsLoading}>
               {testSmsLoading ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
@@ -489,7 +490,7 @@ export default function Scores() {
               </form>
             </DialogContent>
           </Dialog>
-          </div>
+          </div>)}
         </div>
 
         {/* Search */}
