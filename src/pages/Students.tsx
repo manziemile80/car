@@ -402,6 +402,7 @@ export default function Students() {
                       })()}
                     </div>
                   </div>
+                  {canManage && (<>
                   <Button
                     variant="outline"
                     size="sm"
@@ -420,6 +421,7 @@ export default function Students() {
                     <Pencil className="h-4 w-4" />
                     Edit
                   </Button>
+                  </>)}
                 </CardContent>
               </Card>
             ))}
