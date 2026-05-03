@@ -219,6 +219,7 @@ export default function Students() {
               Manage student records and information
             </p>
           </div>
+          {canManage && (
           <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
             <DialogTrigger asChild>
               <Button size="sm" className="w-full sm:w-auto">
@@ -303,6 +304,7 @@ export default function Students() {
               </form>
             </DialogContent>
           </Dialog>
+          )}
         </div>
 
         {/* Search */}
