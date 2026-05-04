@@ -95,7 +95,8 @@ export function RecentScoresTable({ scores, loading }: RecentScoresTableProps) {
               </td>
               <td className="px-4 py-4">
                 {(() => {
-                  const r = remainingMap[score.student_id] ?? 100;
+                  const raw = remainingMap[score.student_id] ?? 100;
+                  const r = Math.max(0, Math.min(100, raw));
                   const cls = r >= 50 ? 'text-success' : r >= 25 ? 'text-warning' : 'text-destructive';
                   return <span className={`font-semibold ${cls}`}>{r}/100</span>;
                 })()}
