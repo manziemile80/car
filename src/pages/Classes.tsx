@@ -14,7 +14,7 @@ import {
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { Class } from '@/types/database';
-import { Plus, Search, BookOpen, Loader2, Users } from 'lucide-react';
+import { Plus, Search, BookOpen, Loader2, Users, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 
 export default function Classes() {
@@ -94,6 +94,14 @@ export default function Classes() {
     setName('');
     setGradeLevel('');
     setAcademicYear(new Date().getFullYear().toString());
+  };
+
+  const handleDeleteClass = async (cls: Class) => {
+    if (!confirm(`Delete class "${cls.name}"? Students linked to it will be unassigned.`)) return;
+    const { error } = await supabase.from('classes').delete().eq('id', cls.id);
+    if (error) return toast.error('Failed to delete', { description: error.message });
+    toast.success('Class deleted');
+    fetchData();
   };
 
   const filteredClasses = classes.filter((cls) =>
@@ -225,6 +233,17 @@ export default function Classes() {
                     </div>
                     <span className="text-sm text-muted-foreground">{cls.academic_year}</span>
                   </div>
+                  {canManage && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="w-full mt-3 text-destructive hover:text-destructive"
+                      onClick={() => handleDeleteClass(cls)}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                      Delete
+                    </Button>
+                  )}
                 </CardContent>
               </Card>
             ))}
