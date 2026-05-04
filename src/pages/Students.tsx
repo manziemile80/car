@@ -21,7 +21,7 @@ import {
 } from '@/components/ui/select';
 import { supabase } from '@/integrations/supabase/client';
 import { Student, Class, Parent, StudentParent } from '@/types/database';
-import { Plus, Search, GraduationCap, Loader2, Users, Pencil } from 'lucide-react';
+import { Plus, Search, GraduationCap, Loader2, Users, Pencil, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { LinkParentsDialog } from '@/components/students/LinkParentsDialog';
@@ -189,6 +189,14 @@ export default function Students() {
     } finally {
       setFormLoading(false);
     }
+  };
+
+  const handleDeleteStudent = async (student: StudentWithClass) => {
+    if (!confirm(`Delete student ${student.first_name} ${student.last_name}? This cannot be undone.`)) return;
+    const { error } = await supabase.from('students').delete().eq('id', student.id);
+    if (error) return toast.error('Failed to delete', { description: error.message });
+    toast.success('Student deleted');
+    fetchData();
   };
 
   const resetForm = () => {
@@ -420,6 +428,15 @@ export default function Students() {
                   >
                     <Pencil className="h-4 w-4" />
                     Edit
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="w-full mt-2 text-destructive hover:text-destructive"
+                    onClick={() => handleDeleteStudent(student)}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                    Delete
                   </Button>
                   </>)}
                 </CardContent>
