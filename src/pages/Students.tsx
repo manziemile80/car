@@ -429,6 +429,15 @@ export default function Students() {
                     <Pencil className="h-4 w-4" />
                     Edit
                   </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="w-full mt-2 text-destructive hover:text-destructive"
+                    onClick={() => handleDeleteStudent(student)}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                    Delete
+                  </Button>
                   </>)}
                 </CardContent>
               </Card>
