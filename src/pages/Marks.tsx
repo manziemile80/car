@@ -86,6 +86,17 @@ export default function Marks() {
 
   const saveAll = async () => {
     if (!user || !subjectId) return;
+    // Validate before saving
+    const invalid = Object.values(marks).find(
+      (m) =>
+        Number(m.cat_score) < 0 ||
+        Number(m.cat_score) > 40 ||
+        Number(m.exam_score) < 0 ||
+        Number(m.exam_score) > 60
+    );
+    if (invalid) {
+      return toast.error('Invalid marks: CAT must be 0–40 and Exam must be 0–60');
+    }
     setSaving(true);
     const rows = Object.values(marks).map((m) => ({
       ...(m.id ? { id: m.id } : {}),
@@ -196,11 +207,17 @@ export default function Marks() {
                           <TableCell className="text-muted-foreground text-xs">{s.student_id}</TableCell>
                           <TableCell>
                             <Input type="number" min={0} max={40} step={0.5} value={m.cat_score} disabled={!canEdit}
-                              onChange={(e) => updateMark(s.id, 'cat_score', e.target.value)} className="h-9" />
+                              onChange={(e) => {
+                                const v = Math.max(0, Math.min(40, Number(e.target.value) || 0));
+                                updateMark(s.id, 'cat_score', v);
+                              }} className="h-9" />
                           </TableCell>
                           <TableCell>
                             <Input type="number" min={0} max={60} step={0.5} value={m.exam_score} disabled={!canEdit}
-                              onChange={(e) => updateMark(s.id, 'exam_score', e.target.value)} className="h-9" />
+                              onChange={(e) => {
+                                const v = Math.max(0, Math.min(60, Number(e.target.value) || 0));
+                                updateMark(s.id, 'exam_score', v);
+                              }} className="h-9" />
                           </TableCell>
                           <TableCell>
                             <span className={`font-bold ${total >= 50 ? 'text-success' : 'text-destructive'}`}>{total.toFixed(1)}</span>
