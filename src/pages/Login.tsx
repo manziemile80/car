@@ -4,8 +4,9 @@ import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Shield, Eye, EyeOff, Loader2 } from 'lucide-react';
+import { Eye, EyeOff, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
+import schoolLogo from '@/assets/college-rebero-logo.png';
 
 export default function Login() {
   const { user, loading: authLoading, signIn } = useAuth();
@@ -48,9 +49,7 @@ export default function Login() {
         <div className="mx-auto w-full max-w-md">
           {/* Logo */}
           <div className="flex items-center gap-3 mb-8">
-            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary">
-              <Shield className="h-7 w-7 text-primary-foreground" />
-            </div>
+            <img src={schoolLogo} alt="College De Rebero" className="h-14 w-14 object-contain" />
             <div>
               <h1 className="text-2xl font-bold text-foreground">College De Rebero</h1>
               <p className="text-sm text-muted-foreground">Behavior Management System</p>
