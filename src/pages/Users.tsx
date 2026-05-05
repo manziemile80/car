@@ -17,8 +17,11 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/contexts/AuthContext';
 import { Profile, AppRole } from '@/types/database';
-import { Users, Loader2, Shield, ShieldCheck, ShieldAlert } from 'lucide-react';
+import { Users, Loader2, Shield, ShieldCheck, ShieldAlert, Trash2 } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
 
@@ -27,10 +30,13 @@ interface UserWithRole extends Profile {
 }
 
 export default function UsersPage() {
+  const { role: currentRole, user: currentUser } = useAuth();
+  const isAdmin = currentRole === 'admin';
   const [users, setUsers] = useState<UserWithRole[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedUser, setSelectedUser] = useState<UserWithRole | null>(null);
   const [newRole, setNewRole] = useState<AppRole>('teacher');
+  const [editName, setEditName] = useState('');
   const [isAssignDialogOpen, setIsAssignDialogOpen] = useState(false);
   const [formLoading, setFormLoading] = useState(false);
 
@@ -74,6 +80,14 @@ export default function UsersPage() {
     setFormLoading(true);
 
     try {
+      // Update profile name
+      if (editName && editName !== selectedUser.full_name) {
+        const { error: pErr } = await supabase
+          .from('profiles')
+          .update({ full_name: editName })
+          .eq('user_id', selectedUser.user_id);
+        if (pErr) throw pErr;
+      }
       // Check if user already has a role
       const { data: existingRole } = await supabase
         .from('user_roles')
@@ -98,14 +112,28 @@ export default function UsersPage() {
         if (error) throw error;
       }
 
-      toast.success('Role assigned successfully');
+      toast.success('User updated successfully');
       setIsAssignDialogOpen(false);
       setSelectedUser(null);
       fetchUsers();
     } catch (error: any) {
-      toast.error('Failed to assign role', { description: error.message });
+      toast.error('Failed to update user', { description: error.message });
     } finally {
       setFormLoading(false);
+    }
+  };
+
+  const handleDeleteUser = async (u: UserWithRole) => {
+    if (u.user_id === currentUser?.id) return toast.error('You cannot delete your own account');
+    if (!confirm(`Delete user "${u.full_name}"? This removes their profile and role assignments.`)) return;
+    try {
+      await supabase.from('user_roles').delete().eq('user_id', u.user_id);
+      const { error } = await supabase.from('profiles').delete().eq('user_id', u.user_id);
+      if (error) throw error;
+      toast.success('User removed');
+      fetchUsers();
+    } catch (e: any) {
+      toast.error('Failed to delete user', { description: e.message });
     }
   };
 
@@ -207,6 +235,8 @@ export default function UsersPage() {
                       {format(new Date(user.created_at), 'MMM d, yyyy')}
                     </td>
                     <td className="px-4 py-4">
+                    {isAdmin ? (
+                    <div className="flex gap-2">
                       <Dialog
                         open={isAssignDialogOpen && selectedUser?.id === user.id}
                         onOpenChange={(open) => {
@@ -221,19 +251,23 @@ export default function UsersPage() {
                             onClick={() => {
                               setSelectedUser(user);
                               setNewRole(user.role || 'teacher');
+                              setEditName(user.full_name);
                             }}
                           >
-                            {user.role ? 'Change Role' : 'Assign Role'}
+                            Edit
                           </Button>
                         </DialogTrigger>
                         <DialogContent className="sm:max-w-sm">
                           <DialogHeader>
-                            <DialogTitle>Assign Role</DialogTitle>
+                            <DialogTitle>Edit User</DialogTitle>
                           </DialogHeader>
                           <div className="space-y-4 mt-4">
-                            <p className="text-sm text-muted-foreground">
-                              Assign a role to <strong>{selectedUser?.full_name}</strong>
-                            </p>
+                            <div className="space-y-2">
+                              <Label>Full Name</Label>
+                              <Input value={editName} onChange={(e) => setEditName(e.target.value)} />
+                            </div>
+                            <div className="space-y-2">
+                              <Label>Role</Label>
                             <Select value={newRole} onValueChange={(v) => setNewRole(v as AppRole)}>
                               <SelectTrigger>
                                 <SelectValue />
@@ -245,6 +279,7 @@ export default function UsersPage() {
                                 <SelectItem value="viewer">Viewer (read-only)</SelectItem>
                               </SelectContent>
                             </Select>
+                            </div>
                             <div className="flex justify-end gap-3">
                               <Button
                                 variant="outline"
@@ -266,6 +301,18 @@ export default function UsersPage() {
                           </div>
                         </DialogContent>
                       </Dialog>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="text-destructive hover:text-destructive"
+                        onClick={() => handleDeleteUser(user)}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+                    ) : (
+                      <span className="text-xs text-muted-foreground">View only</span>
+                    )}
                     </td>
                   </tr>
                 ))}

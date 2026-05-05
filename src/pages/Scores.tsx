@@ -34,7 +34,7 @@ import {
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { Student, Class, BehaviorCategory, BehaviorScoreWithDetails } from '@/types/database';
-import { Plus, Search, ClipboardList, Loader2, Bell, Send, Eye, Check, ChevronsUpDown, Minus } from 'lucide-react';
+import { Plus, Search, ClipboardList, Loader2, Bell, Send, Eye, Check, ChevronsUpDown, Minus, RotateCcw } from 'lucide-react';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { ScoreBadge } from '@/components/dashboard/ScoreBadge';
@@ -73,6 +73,7 @@ export default function Scores() {
   }, [searchParams, setSearchParams]);
   const [formLoading, setFormLoading] = useState(false);
   const [testSmsLoading, setTestSmsLoading] = useState(false);
+  const [resetLoading, setResetLoading] = useState(false);
   const [selectedScore, setSelectedScore] = useState<BehaviorScoreWithDetails | null>(null);
   const [detailsDialogOpen, setDetailsDialogOpen] = useState(false);
   
@@ -241,6 +242,21 @@ export default function Scores() {
     }
   };
 
+  const handleResetAllScores = async () => {
+    if (!confirm('Reset behavior scores for ALL students? This deletes all behavior score records (e.g., at the start of a new term). This cannot be undone.')) return;
+    setResetLoading(true);
+    try {
+      const { error } = await supabase.from('behavior_scores').delete().neq('id', '00000000-0000-0000-0000-000000000000');
+      if (error) throw error;
+      toast.success('All behavior scores have been reset');
+      fetchData();
+    } catch (e: any) {
+      toast.error('Reset failed', { description: e.message });
+    } finally {
+      setResetLoading(false);
+    }
+  };
+
   const filteredScores = scores.filter((s) => {
     if (!s.student) return false;
     const fullName = `${s.student.first_name} ${s.student.last_name}`.toLowerCase();
@@ -272,6 +288,12 @@ export default function Scores() {
             </p>
           </div>
           {canManage && (<div className="flex flex-wrap gap-2">
+            {role === 'admin' && (
+              <Button variant="outline" size="sm" onClick={handleResetAllScores} disabled={resetLoading}>
+                {resetLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <RotateCcw className="h-4 w-4" />}
+                Reset All (New Term)
+              </Button>
+            )}
             <Button variant="outline" size="sm" onClick={handleTestSms} disabled={testSmsLoading}>
               {testSmsLoading ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
@@ -534,9 +556,6 @@ export default function Scores() {
                     Score
                   </th>
                   <th className="px-4 py-3 text-left text-sm font-semibold text-muted-foreground">
-                    Remaining
-                  </th>
-                  <th className="px-4 py-3 text-left text-sm font-semibold text-muted-foreground">
                     Date
                   </th>
                   <th className="px-4 py-3 text-left text-sm font-semibold text-muted-foreground">
@@ -567,14 +586,6 @@ export default function Scores() {
                     </td>
                     <td className="px-4 py-4">
                       <ScoreBadge score={score.score} />
-                    </td>
-                    <td className="px-4 py-4">
-                      {(() => {
-                        const raw = remainingMap[score.student_id] ?? 100;
-                        const r = Math.max(0, Math.min(100, raw));
-                        const cls = r >= 50 ? 'text-success' : r >= 25 ? 'text-warning' : 'text-destructive';
-                        return <span className={`font-semibold ${cls}`}>{r}/100</span>;
-                      })()}
                     </td>
                     <td className="px-4 py-4 text-sm text-muted-foreground">
                       {format(new Date(score.score_date), 'MMM d, yyyy')}

@@ -14,7 +14,7 @@ export function Footer() {
             </div>
           </div>
           <div className="space-y-1.5 text-sm text-muted-foreground">
-            <p className="flex items-center gap-2"><MapPin className="h-4 w-4 text-primary" /> Rebero, Kicukiro, Kigali, Rwanda</p>
+            <p className="flex items-center gap-2"><MapPin className="h-4 w-4 text-primary" /> Gicumbi, Ruvune, Rebero</p>
             <p className="flex items-center gap-2"><Phone className="h-4 w-4 text-primary" /> +250 788 000 000</p>
             <p className="flex items-center gap-2"><Mail className="h-4 w-4 text-primary" /> info@collegederebero.rw</p>
           </div>
