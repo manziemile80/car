@@ -556,9 +556,6 @@ export default function Scores() {
                     Score
                   </th>
                   <th className="px-4 py-3 text-left text-sm font-semibold text-muted-foreground">
-                    Remaining
-                  </th>
-                  <th className="px-4 py-3 text-left text-sm font-semibold text-muted-foreground">
                     Date
                   </th>
                   <th className="px-4 py-3 text-left text-sm font-semibold text-muted-foreground">
@@ -589,14 +586,6 @@ export default function Scores() {
                     </td>
                     <td className="px-4 py-4">
                       <ScoreBadge score={score.score} />
-                    </td>
-                    <td className="px-4 py-4">
-                      {(() => {
-                        const raw = remainingMap[score.student_id] ?? 100;
-                        const r = Math.max(0, Math.min(100, raw));
-                        const cls = r >= 50 ? 'text-success' : r >= 25 ? 'text-warning' : 'text-destructive';
-                        return <span className={`font-semibold ${cls}`}>{r}/100</span>;
-                      })()}
                     </td>
                     <td className="px-4 py-4 text-sm text-muted-foreground">
                       {format(new Date(score.score_date), 'MMM d, yyyy')}
