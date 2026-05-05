@@ -81,7 +81,7 @@ export default function Scores() {
   const [selectedStudent, setSelectedStudent] = useState('');
   const [studentPickerOpen, setStudentPickerOpen] = useState(false);
   const [category, setCategory] = useState<BehaviorCategory>('discipline');
-  const [scoreMode, setScoreMode] = useState<'add' | 'deduct'>('add');
+  const [scoreMode, setScoreMode] = useState<'add' | 'deduct'>('deduct');
   const [score, setScore] = useState([10]);
   const MAX_SCORE = 40;
   const [notes, setNotes] = useState('');
@@ -288,12 +288,10 @@ export default function Scores() {
             </p>
           </div>
           {canManage && (<div className="flex flex-wrap gap-2">
-            {role === 'admin' && (
-              <Button variant="outline" size="sm" onClick={handleResetAllScores} disabled={resetLoading}>
-                {resetLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <RotateCcw className="h-4 w-4" />}
-                Reset All (New Term)
-              </Button>
-            )}
+            <Button variant="outline" size="sm" onClick={handleResetAllScores} disabled={resetLoading}>
+              {resetLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <RotateCcw className="h-4 w-4" />}
+              Reset Marks (New Term)
+            </Button>
             <Button variant="outline" size="sm" onClick={handleTestSms} disabled={testSmsLoading}>
               {testSmsLoading ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
@@ -394,27 +392,9 @@ export default function Scores() {
                   </div>
                 </div>
 
-                {/* Add / Deduct toggle */}
-                <div className="space-y-1.5">
-                  <Label className="text-sm">Action</Label>
-                  <div className="grid grid-cols-2 gap-2">
-                    <Button
-                      type="button"
-                      variant={scoreMode === 'add' ? 'default' : 'outline'}
-                      onClick={() => setScoreMode('add')}
-                      className="gap-1"
-                    >
-                      <Plus className="h-4 w-4" /> Add Marks
-                    </Button>
-                    <Button
-                      type="button"
-                      variant={scoreMode === 'deduct' ? 'destructive' : 'outline'}
-                      onClick={() => setScoreMode('deduct')}
-                      className="gap-1"
-                    >
-                      <Minus className="h-4 w-4" /> Deduct Marks
-                    </Button>
-                  </div>
+                {/* Deduct-only: every student starts the term with 40/40 per category */}
+                <div className="rounded-md border border-border bg-muted/40 p-3 text-xs text-muted-foreground">
+                  Every student starts the term with <span className="font-semibold text-foreground">40/40</span> in each category. You can only <span className="font-semibold text-destructive">deduct</span> marks for misconduct.
                 </div>
 
                 <div className="space-y-2">
