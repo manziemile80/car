@@ -194,7 +194,7 @@ export default function Scores() {
         }
       }
 
-      toast.success(existing ? 'Deduction updated' : 'Marks deducted', {
+      toast.success(existing ? 'Deduction updated for this date' : 'Marks deducted', {
         description: `${combinedDeduction}/${MAX_SCORE} deducted · Parents notified via SMS`,
       });
       setIsAddDialogOpen(false);
