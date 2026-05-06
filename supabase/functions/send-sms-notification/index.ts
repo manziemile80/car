@@ -87,27 +87,25 @@ const handler = async (req: Request): Promise<Response> => {
         continue;
       }
 
-      // Fetch the student's current cumulative & remaining marks for context
-      let remainingMarks: number | null = null;
+      // Fetch the related behavior score record for category + accurate deduction
+      let category = "behavior";
+      let deduction = Math.abs(score);
       try {
-        const { data: cumRow } = await supabase
-          .from("student_cumulative_scores")
-          .select("remaining_marks")
-          .eq("student_id", studentId)
+        const { data: bsRow } = await supabase
+          .from("behavior_scores")
+          .select("category, score")
+          .eq("id", behaviorScoreId)
           .maybeSingle();
-        if (cumRow && typeof (cumRow as any).remaining_marks === "number") {
-          remainingMarks = (cumRow as any).remaining_marks;
+        if (bsRow) {
+          category = (bsRow as any).category || category;
+          deduction = Math.abs((bsRow as any).score ?? score);
         }
-      } catch (_) {
-        // non-fatal
-      }
+      } catch (_) { /* non-fatal */ }
 
+      const MAX_PER_CATEGORY = 40;
+      const remainingInCategory = Math.max(0, MAX_PER_CATEGORY - deduction);
       const childName = `${student.first_name} ${student.last_name}`;
       const className = (student as any).class?.name || "N/A";
-      const isDeduction = score < 0;
-      const absScore = Math.abs(score);
-      const remainingText = remainingMarks !== null ? `${remainingMarks}/100` : "N/A";
-      const action = isDeduction ? "DEDUCTED" : "AWARDED";
 
       // Clear, well-structured bilingual SMS
       const englishPart =
@@ -115,8 +113,9 @@ const handler = async (req: Request): Promise<Response> => {
         `Dear Parent,\n` +
         `Student: ${childName} (Class: ${className})\n` +
         `Date: ${date}\n` +
-        `${absScore} conduct marks ${action}.\n` +
-        `Remaining marks: ${remainingText}.\n` +
+        `Category: ${category}\n` +
+        `Deducted: ${deduction}/${MAX_PER_CATEGORY} marks\n` +
+        `Remaining: ${remainingInCategory}/${MAX_PER_CATEGORY}\n` +
         `Thank you.`;
 
       const kinyarwandaPart =
@@ -124,8 +123,9 @@ const handler = async (req: Request): Promise<Response> => {
         `Mwiriwe Mubyeyi,\n` +
         `Umwana: ${childName} (Ishuri: ${className})\n` +
         `Itariki: ${date}\n` +
-        `Amanota ${absScore} ${isDeduction ? "yakuweho" : "yongereweho"}.\n` +
-        `Amanota asigaye: ${remainingText}.\n` +
+        `Icyiciro: ${category}\n` +
+        `Yakuweho: ${deduction}/${MAX_PER_CATEGORY} amanota\n` +
+        `Asigaye: ${remainingInCategory}/${MAX_PER_CATEGORY}\n` +
         `Murakoze.`;
 
       const message = `${englishPart}\n\n---\n\n${kinyarwandaPart}`;
