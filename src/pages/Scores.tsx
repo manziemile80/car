@@ -81,8 +81,8 @@ export default function Scores() {
   const [selectedStudent, setSelectedStudent] = useState('');
   const [studentPickerOpen, setStudentPickerOpen] = useState(false);
   const [category, setCategory] = useState<BehaviorCategory>('discipline');
-  const [scoreMode, setScoreMode] = useState<'add' | 'deduct'>('deduct');
-  const [score, setScore] = useState([10]);
+  const scoreMode: 'deduct' = 'deduct';
+  const [score, setScore] = useState([1]);
   const MAX_SCORE = 40;
   const [notes, setNotes] = useState('');
   const [scoreDate, setScoreDate] = useState(format(new Date(), 'yyyy-MM-dd'));
@@ -139,7 +139,7 @@ export default function Scores() {
         setFormLoading(false);
         return;
       }
-      const finalScore = scoreMode === 'deduct' ? -absScore : absScore;
+      const finalScore = -absScore;
       const { data: scoreData, error } = await supabase.from('behavior_scores').insert({
         student_id: selectedStudent,
         teacher_id: user.id,
@@ -161,8 +161,8 @@ export default function Scores() {
         }
       }
 
-      toast.success(scoreMode === 'deduct' ? 'Marks deducted' : 'Marks added', {
-        description: `${finalScore > 0 ? '+' : ''}${finalScore} points · Parents notified via SMS`,
+      toast.success('Marks deducted', {
+        description: `${finalScore} points · Parents notified via SMS`,
       });
       setIsAddDialogOpen(false);
       resetForm();
@@ -195,8 +195,7 @@ export default function Scores() {
   const resetForm = () => {
     setSelectedStudent('');
     setCategory('discipline');
-    setScoreMode('add');
-    setScore([10]);
+    setScore([1]);
     setNotes('');
     setScoreDate(format(new Date(), 'yyyy-MM-dd'));
   };
@@ -272,8 +271,7 @@ export default function Scores() {
   const selectedStudentObj = students.find((s) => s.id === selectedStudent);
   const previewRemaining =
     selectedStudent
-      ? (remainingMap[selectedStudent] ?? 100) +
-        (scoreMode === 'deduct' ? -Math.abs(score[0]) : Math.abs(score[0]))
+      ? (remainingMap[selectedStudent] ?? 100) - Math.abs(score[0])
       : null;
 
   return (
@@ -399,9 +397,9 @@ export default function Scores() {
 
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
-                    <Label className="text-sm">Points {scoreMode === 'deduct' ? 'to deduct' : 'to add'}</Label>
-                    <span className={`text-lg font-bold ${scoreMode === 'deduct' ? 'text-destructive' : 'text-success'}`}>
-                      {scoreMode === 'deduct' ? '-' : '+'}{Math.abs(score[0])}
+                    <Label className="text-sm">Points to deduct</Label>
+                    <span className="text-lg font-bold text-destructive">
+                      -{Math.abs(score[0])}
                     </span>
                   </div>
                   <div className="flex items-center gap-3">
