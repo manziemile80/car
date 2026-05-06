@@ -140,29 +140,62 @@ export default function Scores() {
         return;
       }
       const finalScore = -absScore;
-      const { data: scoreData, error } = await supabase.from('behavior_scores').insert({
-        student_id: selectedStudent,
-        teacher_id: user.id,
-        category,
-        score: finalScore,
-        notes: notes || null,
-        score_date: scoreDate,
-      }).select().single();
 
-      if (error) throw error;
+      // Check if a record already exists for this student/category/date
+      const { data: existing, error: existingErr } = await supabase
+        .from('behavior_scores')
+        .select('*')
+        .eq('student_id', selectedStudent)
+        .eq('category', category)
+        .eq('score_date', scoreDate)
+        .maybeSingle();
+      if (existingErr) throw existingErr;
+
+      let scoreData: any = null;
+      let combinedDeduction = absScore;
+
+      if (existing) {
+        // Sum existing deduction with new one, capped at MAX_SCORE
+        const prevAbs = Math.abs(existing.score || 0);
+        combinedDeduction = Math.min(prevAbs + absScore, MAX_SCORE);
+        const mergedNotes = [existing.notes, notes].filter(Boolean).join(' | ') || null;
+        const { data: updated, error: updErr } = await supabase
+          .from('behavior_scores')
+          .update({
+            score: -combinedDeduction,
+            notes: mergedNotes,
+            teacher_id: user.id,
+          })
+          .eq('id', existing.id)
+          .select()
+          .single();
+        if (updErr) throw updErr;
+        scoreData = updated;
+      } else {
+        const { data: inserted, error } = await supabase.from('behavior_scores').insert({
+          student_id: selectedStudent,
+          teacher_id: user.id,
+          category,
+          score: finalScore,
+          notes: notes || null,
+          score_date: scoreDate,
+        }).select().single();
+        if (error) throw error;
+        scoreData = inserted;
+      }
 
       // Send SMS notification
       if (scoreData) {
         try {
-          await sendSmsNotification(scoreData.id, selectedStudent, finalScore, scoreDate);
+          await sendSmsNotification(scoreData.id, selectedStudent, -combinedDeduction, scoreDate);
         } catch (smsError) {
           console.error('SMS notification failed:', smsError);
           // Don't fail the whole operation if SMS fails
         }
       }
 
-      toast.success('Marks deducted', {
-        description: `${finalScore} points · Parents notified via SMS`,
+      toast.success(existing ? 'Deduction updated' : 'Marks deducted', {
+        description: `${combinedDeduction}/${MAX_SCORE} deducted · Parents notified via SMS`,
       });
       setIsAddDialogOpen(false);
       resetForm();
