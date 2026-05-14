@@ -106,9 +106,21 @@ export default function AcademicReports() {
     return ranked;
   }, [students, marks]);
 
+  // Per-term positions (rank within class for each term's percentage)
+  const termPositions = useMemo(() => {
+    const map: Record<string, Record<string, number>> = { term1: {}, term2: {}, term3: {} };
+    TERMS.forEach((t) => {
+      const sorted = [...aggregates]
+        .filter((a) => a.termPct[t] > 0)
+        .sort((a, b) => b.termPct[t] - a.termPct[t]);
+      sorted.forEach((a, i) => { map[t][a.student.id] = i + 1; });
+    });
+    return map;
+  }, [aggregates]);
+
   const filtered = aggregates.filter((a) => `${a.student.first_name} ${a.student.last_name} ${a.student.student_id}`.toLowerCase().includes(search.toLowerCase()));
 
-  const buildStudentReport = (doc: jsPDF, agg: StudentAggregate, cls: ClassRow | undefined, totalStudents: number) => {
+  const buildStudentReport = (doc: jsPDF, agg: StudentAggregate, cls: ClassRow | undefined, totalStudents: number, termPos: Record<string, Record<string, number>>) => {
     const pageW = doc.internal.pageSize.getWidth();
     const pageH = doc.internal.pageSize.getHeight();
 
@@ -189,6 +201,10 @@ export default function AcademicReports() {
     y = (doc as any).lastAutoTable.finalY;
 
     // Summary row: TOTAL / PERCENTAGE / POSITION
+    const posT = (t: string) => {
+      const p = termPos[t]?.[agg.student.id];
+      return p ? `${p} / ${totalStudents}` : '-';
+    };
     autoTable(doc, {
       startY: y,
       theme: 'grid',
@@ -196,7 +212,7 @@ export default function AcademicReports() {
       body: [
         ['TOTAL', agg.termTotals.term1.toFixed(0), agg.termTotals.term2.toFixed(0), agg.termTotals.term3.toFixed(0), agg.annualTotal.toFixed(0)],
         ['PERCENTAGE', `${agg.termPct.term1.toFixed(2)}%`, `${agg.termPct.term2.toFixed(2)}%`, `${agg.termPct.term3.toFixed(2)}%`, `${agg.annualPct.toFixed(2)}%`],
-        ['POSITION', '', '', '', `${agg.position} out of ${totalStudents}`],
+        ['POSITION', posT('term1'), posT('term2'), posT('term3'), `${agg.position} / ${totalStudents}`],
       ],
       columnStyles: { 0: { halign: 'left', fillColor: [240, 240, 245] } },
     });
@@ -228,7 +244,7 @@ export default function AcademicReports() {
     try {
       const cls = classes.find((c) => c.id === classId);
       const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
-      buildStudentReport(doc, agg, cls, aggregates.length);
+      buildStudentReport(doc, agg, cls, aggregates.length, termPositions);
       doc.save(`Report_${agg.student.first_name}_${agg.student.last_name}_${year}.pdf`);
       toast.success('Report downloaded');
     } catch (e: any) {
@@ -244,7 +260,7 @@ export default function AcademicReports() {
     const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
     aggregates.forEach((agg, i) => {
       if (i > 0) doc.addPage();
-      buildStudentReport(doc, agg, cls, aggregates.length);
+      buildStudentReport(doc, agg, cls, aggregates.length, termPositions);
     });
     doc.save(`Class_Reports_${cls?.name || 'class'}_${year}.pdf`);
     toast.success(`Generated ${aggregates.length} reports`);
