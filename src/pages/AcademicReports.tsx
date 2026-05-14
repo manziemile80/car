@@ -177,9 +177,28 @@ export default function AcademicReports() {
       ]);
     });
 
+    // Locked column widths so summary row lines up under subject table
+    const COL_WIDTHS: Record<number, number> = {
+      0: 8,   // #
+      1: 50,  // MODULE
+      2: 14, 3: 14, 4: 14,   // T1: CAT, Exam, Tot
+      5: 14, 6: 14, 7: 14,   // T2
+      8: 14, 9: 14, 10: 14,  // T3
+      11: 18, // Annual
+      12: 18, // A.%
+      13: 20, // DES
+    };
+    const subjectColumnStyles: Record<number, any> = { 1: { halign: 'left', cellWidth: COL_WIDTHS[1] } };
+    Object.entries(COL_WIDTHS).forEach(([k, v]) => {
+      const i = Number(k);
+      subjectColumnStyles[i] = { ...(subjectColumnStyles[i] || {}), cellWidth: v };
+    });
+
     autoTable(doc, {
       startY: y,
       theme: 'grid',
+      tableWidth: 'wrap',
+      margin: { left: 14, right: 14 },
       styles: { fontSize: 7.5, cellPadding: 1, textColor: 0, lineColor: 0, lineWidth: 0.2, halign: 'center' },
       headStyles: { fillColor: [220, 230, 241], textColor: 0, fontStyle: 'bold' },
       head: [
@@ -195,8 +214,8 @@ export default function AcademicReports() {
         ],
         ['CAT', 'Exam', 'Tot', 'CAT', 'Exam', 'Tot', 'CAT', 'Exam', 'Tot'],
       ],
-      body: subjectRows.length ? subjectRows : [[{ content: 'No marks recorded', colSpan: 13, styles: { halign: 'center', fontStyle: 'italic' } }]],
-      columnStyles: { 1: { halign: 'left', cellWidth: 50 } },
+      body: subjectRows.length ? subjectRows : [[{ content: 'No marks recorded', colSpan: 14, styles: { halign: 'center', fontStyle: 'italic' } }]],
+      columnStyles: subjectColumnStyles,
     });
     y = (doc as any).lastAutoTable.finalY;
 
@@ -205,16 +224,40 @@ export default function AcademicReports() {
       const p = termPos[t]?.[agg.student.id];
       return p ? `${p} / ${totalStudents}` : '-';
     };
+    // Mirror subject-table grid: label spans #+MODULE, each term spans its 3 sub-cols, annual spans Annual+A.%+DES
+    const labelCell = (txt: string) => ({ content: txt, colSpan: 2, styles: { halign: 'left' as const, fillColor: [240, 240, 245] as [number, number, number] } });
+    const termCell = (txt: string) => ({ content: txt, colSpan: 3 });
+    const annualCell = (txt: string) => ({ content: txt, colSpan: 3 });
     autoTable(doc, {
       startY: y,
       theme: 'grid',
+      tableWidth: 'wrap',
+      margin: { left: 14, right: 14 },
       styles: { fontSize: 8.5, cellPadding: 1.5, textColor: 0, lineColor: 0, lineWidth: 0.2, halign: 'center', fontStyle: 'bold' },
+      columnStyles: subjectColumnStyles,
       body: [
-        ['TOTAL', agg.termTotals.term1.toFixed(0), agg.termTotals.term2.toFixed(0), agg.termTotals.term3.toFixed(0), agg.annualTotal.toFixed(0)],
-        ['PERCENTAGE', `${agg.termPct.term1.toFixed(2)}%`, `${agg.termPct.term2.toFixed(2)}%`, `${agg.termPct.term3.toFixed(2)}%`, `${agg.annualPct.toFixed(2)}%`],
-        ['POSITION', posT('term1'), posT('term2'), posT('term3'), `${agg.position} / ${totalStudents}`],
+        [
+          labelCell('TOTAL'),
+          termCell(agg.termTotals.term1.toFixed(0)),
+          termCell(agg.termTotals.term2.toFixed(0)),
+          termCell(agg.termTotals.term3.toFixed(0)),
+          annualCell(agg.annualTotal.toFixed(0)),
+        ],
+        [
+          labelCell('PERCENTAGE'),
+          termCell(`${agg.termPct.term1.toFixed(2)}%`),
+          termCell(`${agg.termPct.term2.toFixed(2)}%`),
+          termCell(`${agg.termPct.term3.toFixed(2)}%`),
+          annualCell(`${agg.annualPct.toFixed(2)}%`),
+        ],
+        [
+          labelCell('POSITION'),
+          termCell(posT('term1')),
+          termCell(posT('term2')),
+          termCell(posT('term3')),
+          annualCell(`${agg.position} / ${totalStudents}`),
+        ],
       ],
-      columnStyles: { 0: { halign: 'left', fillColor: [240, 240, 245] } },
     });
     y = (doc as any).lastAutoTable.finalY + 12;
 
