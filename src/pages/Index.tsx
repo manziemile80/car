@@ -1,10 +1,60 @@
 import { Link, Navigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
-import { GraduationCap, Bell, BarChart3, CheckCircle, Loader2 } from 'lucide-react';
+import {
+  GraduationCap,
+  Bell,
+  BarChart3,
+  CheckCircle,
+  Loader2,
+  LayoutDashboard,
+  ClipboardList,
+  CalendarCheck,
+  FileText,
+  Users,
+  LogIn,
+  ShieldCheck,
+  Circle,
+} from 'lucide-react';
 import landingStudents from '@/assets/landing-students.jpg';
-import landingSchool from '@/assets/landing-school.jpg';
 import schoolLogo from '@/assets/college-rebero-logo.png';
+
+const navItems = [
+  { label: 'Dashboard', icon: LayoutDashboard },
+  { label: 'Students', icon: GraduationCap },
+  { label: 'Behavior Scores', icon: ClipboardList },
+  { label: 'Attendance', icon: CalendarCheck },
+  { label: 'Academic Reports', icon: FileText },
+  { label: 'Reports', icon: BarChart3 },
+  { label: 'Users', icon: Users },
+];
+
+const modules = [
+  {
+    icon: ClipboardList,
+    title: 'Behavior Scores',
+    desc: 'Deduct conduct marks per category, every student starts each term at 40/40.',
+    tone: 'text-primary bg-primary/10',
+  },
+  {
+    icon: Bell,
+    title: 'Parent SMS',
+    desc: 'Bilingual alerts (EN/RW) sent automatically with deducted and remaining marks.',
+    tone: 'text-secondary bg-secondary/10',
+  },
+  {
+    icon: FileText,
+    title: 'Academic Reports',
+    desc: 'Per-term CAT/Exam marks, class position and printable PDF report cards.',
+    tone: 'text-accent bg-accent/10',
+  },
+  {
+    icon: ShieldCheck,
+    title: 'Role-Based Access',
+    desc: 'Admin, teacher, parent and read-only viewer permissions enforced end to end.',
+    tone: 'text-success bg-success/10',
+  },
+];
 
 export default function Index() {
   const { user, loading } = useAuth();
@@ -22,143 +72,151 @@ export default function Index() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Hero Section */}
-      <div className="relative overflow-hidden hero-gradient">
-        {/* Animated background images */}
-        <div className="pointer-events-none absolute inset-0 z-0">
-          <img
-            src={landingStudents}
-            alt="Students at College De Rebero"
-            width={1920}
-            height={1088}
-            className="absolute inset-0 h-full w-full object-cover opacity-0 animate-hero-bg-1 will-change-transform"
-          />
-          <img
-            src={landingSchool}
-            alt="College De Rebero campus"
-            width={1920}
-            height={1088}
-            loading="lazy"
-            className="absolute inset-0 h-full w-full object-cover opacity-0 animate-hero-bg-2 will-change-transform"
-          />
-          {/* Lighter overlay so animated images stay visible while keeping text contrast */}
-          <div className="absolute inset-0 bg-gradient-to-b from-primary/45 via-primary/30 to-primary/55" />
-        </div>
-
-        <nav className="container relative z-10 mx-auto flex items-center justify-between py-6 px-4">
-          <div className="flex items-center gap-3">
-            <img src={schoolLogo} alt="College De Rebero logo" width={48} height={48} className="h-12 w-12 drop-shadow" />
-            <span className="text-xl font-bold text-primary-foreground drop-shadow">College De Rebero</span>
+    <div className="min-h-screen bg-background flex flex-col">
+      {/* App top bar */}
+      <header className="sticky top-0 z-30 border-b border-border bg-card/95 backdrop-blur">
+        <div className="flex h-14 items-center justify-between gap-3 px-3 sm:px-5">
+          <div className="flex items-center gap-2.5 min-w-0">
+            <img src={schoolLogo} alt="College De Rebero logo" width={32} height={32} className="h-8 w-8 object-contain" />
+            <div className="min-w-0">
+              <p className="truncate text-sm font-semibold leading-tight text-foreground">College De Rebero</p>
+              <p className="truncate text-[11px] leading-tight text-muted-foreground">Behavior Management System</p>
+            </div>
           </div>
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2">
+            <span className="hidden items-center gap-1.5 rounded-full border border-border px-2.5 py-1 text-[11px] text-muted-foreground sm:inline-flex">
+              <Circle className="h-2 w-2 fill-success text-success" /> System online
+            </span>
             <Link to="/login">
-              <Button variant="ghost" className="text-primary-foreground hover:bg-primary-foreground/20">
-                Sign In
+              <Button variant="outline" size="sm" className="gap-1.5">
+                <LogIn className="h-4 w-4" /> Sign In
               </Button>
             </Link>
             <Link to="/signup">
-              <Button className="bg-primary-foreground text-primary hover:bg-primary-foreground/90">
-                Get Started
-              </Button>
+              <Button size="sm">Create Account</Button>
             </Link>
           </div>
-        </nav>
+        </div>
+      </header>
 
-        <div className="container relative z-10 mx-auto px-4 py-20 text-center">
-          <h1 className="text-5xl font-bold tracking-tight text-primary-foreground md:text-6xl drop-shadow-lg">
-            Student Behavior
-            <br />
-            Management Made Easy
-          </h1>
-          <p className="mx-auto mt-6 max-w-2xl text-lg text-primary-foreground/95 drop-shadow">
-            Empower teachers to track student behavior, engage parents with instant notifications,
-            and foster a positive learning environment with our comprehensive system.
+      <div className="flex flex-1">
+        {/* Static nav preview (system shell) */}
+        <aside className="hidden w-56 shrink-0 flex-col border-r border-sidebar-border bg-sidebar p-3 lg:flex">
+          <p className="px-2 pb-2 text-[11px] font-semibold uppercase tracking-wider text-sidebar-foreground/60">
+            Modules
           </p>
-          <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
-            <Link to="/signup">
-              <Button size="lg" className="bg-primary-foreground text-primary hover:bg-primary-foreground/90">
-                Start Free Trial
-              </Button>
-            </Link>
+          <nav className="space-y-1">
+            {navItems.map((item) => (
+              <div
+                key={item.label}
+                className="flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm text-sidebar-foreground/70"
+              >
+                <item.icon className="h-4 w-4" />
+                {item.label}
+              </div>
+            ))}
+          </nav>
+          <div className="mt-auto rounded-lg bg-sidebar-accent/60 p-3 text-xs text-sidebar-foreground/80">
+            Sign in to unlock the modules for your role.
+          </div>
+        </aside>
+
+        {/* Main workspace */}
+        <main className="flex-1 min-w-0 p-3 sm:p-5 space-y-4">
+          {/* Console banner */}
+          <section className="relative overflow-hidden rounded-xl border border-border">
+            <img
+              src={landingStudents}
+              alt="Students at College De Rebero"
+              className="absolute inset-0 h-full w-full object-cover animate-hero-bg-1"
+            />
+            <div className="absolute inset-0 bg-gradient-to-r from-primary/85 via-primary/60 to-primary/30" />
+            <div className="relative z-10 p-5 sm:p-8">
+              <p className="text-[11px] font-semibold uppercase tracking-widest text-primary-foreground/80">
+                Conduct · Console
+              </p>
+              <h1 className="mt-2 text-2xl font-bold tracking-tight text-primary-foreground sm:text-3xl">
+                Student Behavior &amp; Academic Records
+              </h1>
+              <p className="mt-2 max-w-xl text-sm text-primary-foreground/90">
+                Record conduct deductions, take attendance, enter subject marks and generate ranked
+                report cards — all in one internal system.
+              </p>
+              <div className="mt-5 flex flex-wrap gap-2">
+                <Link to="/login">
+                  <Button size="sm" className="bg-primary-foreground text-primary hover:bg-primary-foreground/90">
+                    Open the system
+                  </Button>
+                </Link>
+                <Link to="/signup">
+                  <Button size="sm" variant="outline" className="border-primary-foreground/40 bg-transparent text-primary-foreground hover:bg-primary-foreground/15">
+                    Request access
+                  </Button>
+                </Link>
+              </div>
+            </div>
+          </section>
+
+          {/* Status tiles */}
+          <section className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+            {[
+              { label: 'Conduct baseline', value: '40/40', hint: 'Per student, per term' },
+              { label: 'Marks split', value: '40 + 60', hint: 'CAT + Exam' },
+              { label: 'Parent alerts', value: 'EN / RW', hint: 'Bilingual SMS' },
+              { label: 'Report cards', value: 'PDF', hint: 'Ranked by position' },
+            ].map((s) => (
+              <div key={s.label} className="rounded-xl border border-border bg-card p-3.5">
+                <p className="text-[11px] uppercase tracking-wide text-muted-foreground">{s.label}</p>
+                <p className="mt-1 text-xl font-semibold text-foreground">{s.value}</p>
+                <p className="text-[11px] text-muted-foreground">{s.hint}</p>
+              </div>
+            ))}
+          </section>
+
+          {/* Modules panel */}
+          <section className="rounded-xl border border-border bg-card">
+            <div className="flex items-center justify-between border-b border-border px-4 py-3">
+              <h2 className="text-sm font-semibold text-foreground">Available modules</h2>
+              <span className="text-[11px] text-muted-foreground">Access depends on your role</span>
+            </div>
+            <div className="grid gap-3 p-4 sm:grid-cols-2">
+              {modules.map((m) => (
+                <div key={m.title} className="flex gap-3 rounded-lg border border-border/70 bg-background p-3.5">
+                  <div className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ${m.tone}`}>
+                    <m.icon className="h-4.5 w-4.5" />
+                  </div>
+                  <div>
+                    <h3 className="text-sm font-semibold text-foreground">{m.title}</h3>
+                    <p className="mt-1 text-xs text-muted-foreground">{m.desc}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </section>
+
+          {/* Access row */}
+          <section className="flex flex-col items-start justify-between gap-3 rounded-xl border border-border bg-muted/50 p-4 sm:flex-row sm:items-center">
+            <div className="flex items-start gap-2.5">
+              <CheckCircle className="mt-0.5 h-5 w-5 text-success" />
+              <div>
+                <p className="text-sm font-medium text-foreground">Already registered?</p>
+                <p className="text-xs text-muted-foreground">
+                  New accounts start as read-only viewers until an administrator assigns a role.
+                </p>
+              </div>
+            </div>
             <Link to="/login">
-              <Button size="lg" variant="outline" className="border-primary-foreground/30 text-primary hover:bg-primary-foreground/10">
-                Learn More
-              </Button>
+              <Button size="sm">Sign in</Button>
             </Link>
-          </div>
-        </div>
-      </div>
-
-      {/* Features Section */}
-      <div className="container mx-auto px-4 py-20">
-        <div className="text-center mb-16">
-          <h2 className="text-3xl font-bold text-foreground">Everything You Need</h2>
-          <p className="mt-4 text-lg text-muted-foreground">
-            A complete solution for managing student behavior and engaging parents
-          </p>
-        </div>
-
-        <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-4">
-          <div className="text-center">
-            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-xl bg-primary/10 text-primary">
-              <GraduationCap className="h-7 w-7" />
-            </div>
-            <h3 className="mt-4 text-lg font-semibold text-foreground">Behavior Tracking</h3>
-            <p className="mt-2 text-muted-foreground">
-              Track discipline, respect, attendance, and participation scores for each student
-            </p>
-          </div>
-
-          <div className="text-center">
-            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-xl bg-secondary/10 text-secondary">
-              <Bell className="h-7 w-7" />
-            </div>
-            <h3 className="mt-4 text-lg font-semibold text-foreground">SMS Notifications</h3>
-            <p className="mt-2 text-muted-foreground">
-              Automatically notify parents via SMS when behavior scores are recorded
-            </p>
-          </div>
-
-          <div className="text-center">
-            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-xl bg-accent/10 text-accent">
-              <BarChart3 className="h-7 w-7" />
-            </div>
-            <h3 className="mt-4 text-lg font-semibold text-foreground">Reports & Analytics</h3>
-            <p className="mt-2 text-muted-foreground">
-              Generate comprehensive reports and visualize behavior trends over time
-            </p>
-          </div>
-
-          <div className="text-center">
-            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-xl bg-success/10 text-success">
-              <CheckCircle className="h-7 w-7" />
-            </div>
-            <h3 className="mt-4 text-lg font-semibold text-foreground">Role-Based Access</h3>
-            <p className="mt-2 text-muted-foreground">
-              Secure access for administrators, teachers, and parents with different permissions
-            </p>
-          </div>
-        </div>
-      </div>
-
-      {/* CTA Section */}
-      <div className="bg-muted py-20">
-        <div className="container mx-auto px-4 text-center">
-          <h2 className="text-3xl font-bold text-foreground">Ready to Get Started?</h2>
-          <p className="mt-4 text-lg text-muted-foreground">
-            Join hundreds of schools already using College De Rebero to manage student behavior
-          </p>
-          <Link to="/signup" className="mt-8 inline-block">
-            <Button size="lg">Create Your Account</Button>
-          </Link>
-        </div>
+          </section>
+        </main>
       </div>
 
       {/* Footer */}
-      <footer className="border-t border-border py-8">
-        <div className="container mx-auto px-4 text-center text-sm text-muted-foreground">
-          <p>© 2026 College De Rebero. All rights reserved.</p>
+      <footer className="border-t border-border bg-card/60 px-4 py-4 text-center text-xs text-muted-foreground sm:text-left">
+        <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
+          <span>Gicumbi, Ruvune, Rebero · +250 788 000 000 · info@collegederebero.rw</span>
+          <span>© {new Date().getFullYear()} College De Rebero — Excellence · Discipline · Integrity</span>
         </div>
       </footer>
     </div>
