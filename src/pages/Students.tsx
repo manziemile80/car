@@ -569,7 +569,7 @@ export default function Students() {
             currentUserId={accountStudent.user_id ?? null}
             open={accountDialogOpen}
             onOpenChange={setAccountDialogOpen}
-            onLinked={fetchStudents}
+            onLinked={fetchData}
           />
         )}
 
