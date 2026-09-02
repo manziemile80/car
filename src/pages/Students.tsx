@@ -25,6 +25,7 @@ import { Plus, Search, GraduationCap, Loader2, Users, Pencil, Trash2 } from 'luc
 import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { LinkParentsDialog } from '@/components/students/LinkParentsDialog';
+import { LinkStudentAccountDialog } from '@/components/students/LinkStudentAccountDialog';
 import { useAuth } from '@/contexts/AuthContext';
 
 interface LinkedParent extends StudentParent {
@@ -42,6 +43,7 @@ interface StudentWithClass extends Student {
 export default function Students() {
   const { role } = useAuth();
   const canManage = role === 'admin' || role === 'teacher';
+  const isAdmin = role === 'admin';
   const [searchParams, setSearchParams] = useSearchParams();
   const [students, setStudents] = useState<StudentWithClass[]>([]);
   const [classes, setClasses] = useState<Class[]>([]);
@@ -62,6 +64,8 @@ export default function Students() {
   
   // Link parents dialog state
   const [linkDialogOpen, setLinkDialogOpen] = useState(false);
+  const [accountDialogOpen, setAccountDialogOpen] = useState(false);
+  const [accountStudent, setAccountStudent] = useState<StudentWithClass | null>(null);
   const [selectedStudent, setSelectedStudent] = useState<StudentWithClass | null>(null);
   
   // Form state
@@ -421,6 +425,20 @@ export default function Students() {
                     <Users className="h-4 w-4" />
                     Link Parents
                   </Button>
+                  {isAdmin && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="w-full mt-2"
+                      onClick={() => {
+                        setAccountStudent(student);
+                        setAccountDialogOpen(true);
+                      }}
+                    >
+                      <Users className="h-4 w-4" />
+                      {student.user_id ? 'Change Login Account' : 'Link Login Account'}
+                    </Button>
+                  )}
                   <Button
                     variant="ghost"
                     size="sm"
@@ -543,6 +561,17 @@ export default function Students() {
             </form>
           </DialogContent>
         </Dialog>
+
+        {accountStudent && (
+          <LinkStudentAccountDialog
+            studentId={accountStudent.id}
+            studentName={`${accountStudent.first_name} ${accountStudent.last_name}`}
+            currentUserId={accountStudent.user_id ?? null}
+            open={accountDialogOpen}
+            onOpenChange={setAccountDialogOpen}
+            onLinked={fetchStudents}
+          />
+        )}
 
         {/* Link Parents Dialog */}
         {selectedStudent && (
