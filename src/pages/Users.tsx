@@ -276,6 +276,7 @@ export default function UsersPage() {
                                 <SelectItem value="admin">Administrator</SelectItem>
                                 <SelectItem value="teacher">Teacher</SelectItem>
                                 <SelectItem value="parent">Parent</SelectItem>
+                                <SelectItem value="student">Student</SelectItem>
                                 <SelectItem value="viewer">Viewer (read-only)</SelectItem>
                               </SelectContent>
                             </Select>
