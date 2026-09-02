@@ -1,4 +1,3 @@
-import { PageHeader } from '@/components/layout/PageHeader';
 import { useEffect, useState } from 'react';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -137,7 +136,8 @@ export default function Reports() {
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
           <div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-foreground">Reports</h1>
+            <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-secondary">Records</p>
+            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground">Reports</h1>
             <p className="mt-1 text-sm sm:text-base text-muted-foreground">
               Analyze behavior trends and performance metrics
             </p>

@@ -1,4 +1,3 @@
-import { PageHeader } from '@/components/layout/PageHeader';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
@@ -11,7 +10,8 @@ export default function Settings() {
       <div className="space-y-6 animate-fade-in">
         {/* Header */}
         <div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-foreground">Settings</h1>
+          <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-secondary">Administration</p>
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground">Settings</h1>
           <p className="mt-1 text-sm sm:text-base text-muted-foreground">
             Configure system preferences and notifications
           </p>

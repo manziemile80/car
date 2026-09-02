@@ -1,4 +1,3 @@
-import { PageHeader } from '@/components/layout/PageHeader';
 import { useEffect, useState, useMemo } from 'react';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { Button } from '@/components/ui/button';
@@ -126,7 +125,8 @@ export default function Marks() {
     <DashboardLayout>
       <div className="space-y-6 animate-fade-in">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-foreground">Marks Entry</h1>
+          <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-secondary">Records</p>
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground">Marks Entry</h1>
           <p className="mt-1 text-sm text-muted-foreground">CAT (out of 40) + Exam (out of 60) per student per subject per term</p>
         </div>
 
