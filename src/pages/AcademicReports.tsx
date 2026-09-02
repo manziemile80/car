@@ -313,7 +313,8 @@ export default function AcademicReports() {
     <DashboardLayout>
       <div className="space-y-6 animate-fade-in">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-foreground">Academic Reports</h1>
+          <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-secondary">Records</p>
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground">Academic Reports</h1>
           <p className="mt-1 text-sm text-muted-foreground">Ranked class performance with downloadable termly reports</p>
         </div>
 

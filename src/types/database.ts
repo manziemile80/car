@@ -41,6 +41,7 @@ export interface Student {
   date_of_birth: string | null;
   enrollment_date: string;
   status: string;
+  user_id?: string | null;
   created_at: string;
   updated_at: string;
 }

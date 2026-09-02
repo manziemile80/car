@@ -172,7 +172,8 @@ export default function Classes() {
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
           <div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-foreground">Classes</h1>
+            <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-secondary">School</p>
+            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground">Classes</h1>
             <p className="mt-1 text-sm sm:text-base text-muted-foreground">
               Manage class sections and assignments
             </p>

@@ -21,6 +21,10 @@ import Subjects from "./pages/Subjects";
 import Marks from "./pages/Marks";
 import Attendance from "./pages/Attendance";
 import AcademicReports from "./pages/AcademicReports";
+import Courses from "./pages/Courses";
+import Materials from "./pages/Materials";
+import Assignments from "./pages/Assignments";
+import Quizzes from "./pages/Quizzes";
 
 const queryClient = new QueryClient();
 
@@ -46,6 +50,10 @@ const App = () => (
             <Route path="/marks" element={<Marks />} />
             <Route path="/attendance" element={<Attendance />} />
             <Route path="/academic-reports" element={<AcademicReports />} />
+            <Route path="/courses" element={<Courses />} />
+            <Route path="/materials" element={<Materials />} />
+            <Route path="/assignments" element={<Assignments />} />
+            <Route path="/quizzes" element={<Quizzes />} />
             <Route path="/users" element={<Users />} />
             <Route path="/settings" element={<Settings />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}

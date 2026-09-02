@@ -1,3 +1,4 @@
+import { PageHeader } from '@/components/layout/PageHeader';
 import { useEffect, useState } from 'react';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { Button } from '@/components/ui/button';
@@ -166,13 +167,11 @@ export default function UsersPage() {
   return (
     <DashboardLayout>
       <div className="space-y-6 animate-fade-in">
-        {/* Header */}
-        <div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-foreground">User Management</h1>
-          <p className="mt-1 text-sm sm:text-base text-muted-foreground">
-            Manage user accounts and role assignments
-          </p>
-        </div>
+        <PageHeader
+          eyebrow="Administration"
+          title="User Management"
+          description="Manage user accounts and role assignments across the school system."
+        />
 
         {/* Users List */}
         {loading ? (
@@ -276,6 +275,7 @@ export default function UsersPage() {
                                 <SelectItem value="admin">Administrator</SelectItem>
                                 <SelectItem value="teacher">Teacher</SelectItem>
                                 <SelectItem value="parent">Parent</SelectItem>
+                                <SelectItem value="student">Student</SelectItem>
                                 <SelectItem value="viewer">Viewer (read-only)</SelectItem>
                               </SelectContent>
                             </Select>

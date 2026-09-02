@@ -95,12 +95,13 @@ export default function Dashboard() {
     <DashboardLayout>
       <div className="space-y-8 animate-fade-in">
         {/* Header */}
-        <div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-foreground">
-            {getGreeting()}, {profile?.full_name?.split(' ')[0] || 'there'}!
+        <div className="space-y-2">
+          <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-secondary">Dashboard</p>
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground">
+            {getGreeting()}, {profile?.full_name?.split(' ')[0] || 'there'}
           </h1>
-          <p className="mt-1 text-sm sm:text-base text-muted-foreground">
-            Welcome to your User dashboard. Here's what's happening today.
+          <p className="max-w-2xl text-sm text-muted-foreground">
+            Your school at a glance — students, conduct records, academics and e-learning activity.
           </p>
         </div>
 
