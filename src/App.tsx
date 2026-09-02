@@ -21,6 +21,10 @@ import Subjects from "./pages/Subjects";
 import Marks from "./pages/Marks";
 import Attendance from "./pages/Attendance";
 import AcademicReports from "./pages/AcademicReports";
+import Courses from "./pages/Courses";
+import Materials from "./pages/Materials";
+import Assignments from "./pages/Assignments";
+import Quizzes from "./pages/Quizzes";
 
 const queryClient = new QueryClient();
 
