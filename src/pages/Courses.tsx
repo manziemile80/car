@@ -183,7 +183,7 @@ export default function Courses() {
   return (
     <DashboardLayout>
       <PageHeader
-        eyebrow="E-learning"
+        eyebrow="E-Learning"
         title="Courses"
         description="Online courses with lessons, videos and reading content for each subject and class."
         actions={

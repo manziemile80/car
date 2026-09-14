@@ -186,7 +186,7 @@ export default function Assignments() {
   return (
     <DashboardLayout>
       <PageHeader
-        eyebrow="E-learning"
+        eyebrow="E-Learning"
         title="Assignments"
         description={
           isStaff

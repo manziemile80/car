@@ -108,7 +108,7 @@ export default function Materials() {
   return (
     <DashboardLayout>
       <PageHeader
-        eyebrow="E-learning"
+        eyebrow="E-Learning"
         title="Learning Materials"
         description="Notes, PDFs and resources shared with students for each subject and class."
         actions={

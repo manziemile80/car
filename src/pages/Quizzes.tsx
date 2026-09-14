@@ -221,7 +221,7 @@ export default function Quizzes() {
   return (
     <DashboardLayout>
       <PageHeader
-        eyebrow="E-learning"
+        eyebrow="E-Learning"
         title="Quizzes"
         description={
           isStaff
