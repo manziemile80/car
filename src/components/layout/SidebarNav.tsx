@@ -26,7 +26,7 @@ export function SidebarNav() {
         <img src={schoolLogo} alt="College De Rebero" width={34} height={34} className="h-8 w-8 object-contain" />
         <div className="min-w-0">
           <p className="truncate text-sm font-bold leading-tight text-sidebar-foreground">College De Rebero</p>
-          <p className="truncate text-[11px] leading-tight text-sidebar-foreground/60">School &amp; E-learning</p>
+          <p className="truncate text-[11px] leading-tight text-sidebar-foreground/60">School &amp; E-Learning</p>
         </div>
       </div>
 
