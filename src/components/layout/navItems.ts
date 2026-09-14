@@ -22,7 +22,7 @@ export interface NavItem {
   href: string;
   icon: React.ElementType;
   roles: AppRole[];
-  group: 'Overview' | 'School' | 'E-learning' | 'Records' | 'Admin';
+  group: 'Overview' | 'School' | 'E-Learning' | 'Records' | 'Admin';
 }
 
 export const navItems: NavItem[] = [
@@ -33,10 +33,10 @@ export const navItems: NavItem[] = [
   { label: 'Subjects', href: '/subjects', icon: Library, roles: ['admin', 'teacher', 'viewer'], group: 'School' },
   { label: 'Parents', href: '/parents', icon: UserCheck, roles: ['admin'], group: 'School' },
 
-  { label: 'Courses', href: '/courses', icon: NotebookPen, roles: ['admin', 'teacher', 'parent', 'student'], group: 'E-learning' },
-  { label: 'Materials', href: '/materials', icon: FolderOpen, roles: ['admin', 'teacher', 'parent', 'student'], group: 'E-learning' },
-  { label: 'Assignments', href: '/assignments', icon: ClipboardList, roles: ['admin', 'teacher', 'parent', 'student'], group: 'E-learning' },
-  { label: 'Quizzes', href: '/quizzes', icon: ListChecks, roles: ['admin', 'teacher', 'parent', 'student'], group: 'E-learning' },
+  { label: 'Courses', href: '/courses', icon: NotebookPen, roles: ['admin', 'teacher', 'parent', 'student'], group: 'E-Learning' },
+  { label: 'Materials', href: '/materials', icon: FolderOpen, roles: ['admin', 'teacher', 'parent', 'student'], group: 'E-Learning' },
+  { label: 'Assignments', href: '/assignments', icon: ClipboardList, roles: ['admin', 'teacher', 'parent', 'student'], group: 'E-Learning' },
+  { label: 'Quizzes', href: '/quizzes', icon: ListChecks, roles: ['admin', 'teacher', 'parent', 'student'], group: 'E-Learning' },
 
   { label: 'Behavior Scores', href: '/scores', icon: ClipboardList, roles: ['admin', 'teacher', 'parent', 'student'], group: 'Records' },
   { label: 'Marks Entry', href: '/marks', icon: Pencil, roles: ['admin', 'teacher'], group: 'Records' },
