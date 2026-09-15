@@ -185,7 +185,20 @@ export default function Quizzes() {
   };
 
   const submitQuiz = async () => {
-    if (!takeQuiz || !studentId) return;
+    if (!takeQuiz) return;
+    if (!studentId) {
+      toast({
+        title: 'Connect your student profile first',
+        description: 'Pick your name so we can save your answers.',
+        variant: 'destructive',
+      });
+      setClaimOpen(true);
+      return;
+    }
+    if (takeQuestions.some((q) => !answers[q.id])) {
+      toast({ title: 'Answer every question before submitting', variant: 'destructive' });
+      return;
+    }
     let score = 0;
     let total = 0;
     takeQuestions.forEach((q) => {
