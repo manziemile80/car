@@ -252,6 +252,30 @@ export default function Quizzes() {
         }
       />
 
+      {role === 'student' && !studentId && (
+        <Card className="mb-4">
+          <CardContent className="flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <p className="text-sm font-medium text-foreground">Connect your student profile</p>
+              <p className="text-xs text-muted-foreground">
+                Pick your name once so your quiz answers are saved.
+              </p>
+            </div>
+            <Button size="sm" className="gap-1.5" onClick={() => setClaimOpen(true)}>
+              <UserCheck className="h-4 w-4" /> Find my profile
+            </Button>
+          </CardContent>
+        </Card>
+      )}
+
+      <ClaimStudentRecordDialog
+        open={claimOpen}
+        onOpenChange={setClaimOpen}
+        onLinked={() => {
+          refreshStudent();
+        }}
+      />
+
       {loading ? (
         <div className="flex justify-center py-16">
           <Loader2 className="h-6 w-6 animate-spin text-primary" />
