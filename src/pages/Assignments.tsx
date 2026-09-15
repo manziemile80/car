@@ -19,7 +19,8 @@ import {
 } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
-import { Plus, Trash2, ClipboardList, Loader2, Send, GraduationCap, CalendarDays } from 'lucide-react';
+import { Plus, Trash2, ClipboardList, Loader2, Send, GraduationCap, CalendarDays, UserCheck } from 'lucide-react';
+import { ClaimStudentRecordDialog } from '@/components/students/ClaimStudentRecordDialog';
 
 interface Assignment {
   id: string;
