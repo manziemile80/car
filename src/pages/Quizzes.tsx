@@ -21,7 +21,8 @@ import {
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 import { useToast } from '@/hooks/use-toast';
-import { Plus, Trash2, ListChecks, Loader2, PenLine, BarChart3 } from 'lucide-react';
+import { Plus, Trash2, ListChecks, Loader2, PenLine, BarChart3, UserCheck } from 'lucide-react';
+import { ClaimStudentRecordDialog } from '@/components/students/ClaimStudentRecordDialog';
 
 interface Quiz {
   id: string;
@@ -62,8 +63,9 @@ const emptyQuestion = { question_text: '', option_a: '', option_b: '', option_c:
 export default function Quizzes() {
   const { role, user } = useAuth();
   const { toast } = useToast();
-  const { studentId } = useCurrentStudent();
+  const { studentId, refresh: refreshStudent } = useCurrentStudent();
   const isStaff = role === 'admin' || role === 'teacher';
+  const [claimOpen, setClaimOpen] = useState(false);
 
   const [quizzes, setQuizzes] = useState<Quiz[]>([]);
   const [subjects, setSubjects] = useState<{ id: string; name: string }[]>([]);
