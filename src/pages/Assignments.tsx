@@ -56,8 +56,9 @@ const emptyForm = {
 export default function Assignments() {
   const { role, user } = useAuth();
   const { toast } = useToast();
-  const { studentId } = useCurrentStudent();
+  const { studentId, refresh: refreshStudent } = useCurrentStudent();
   const isStaff = role === 'admin' || role === 'teacher';
+  const [claimOpen, setClaimOpen] = useState(false);
 
   const [assignments, setAssignments] = useState<Assignment[]>([]);
   const [mySubmissions, setMySubmissions] = useState<Submission[]>([]);
@@ -131,7 +132,17 @@ export default function Assignments() {
   };
 
   const submitWork = async () => {
-    if (!submitFor || !studentId) return;
+    if (!submitFor) return;
+    if (!studentId) {
+      toast({
+        title: 'Connect your student profile first',
+        description: 'Pick your name so we can save your work.',
+        variant: 'destructive',
+      });
+      setSubmitFor(null);
+      setClaimOpen(true);
+      return;
+    }
     if (!answer.answer_text.trim() && !answer.file_url.trim()) {
       toast({ title: 'Add an answer or a file link', variant: 'destructive' });
       return;
@@ -201,6 +212,28 @@ export default function Assignments() {
             </Button>
           ) : undefined
         }
+      />
+
+      {role === 'student' && !studentId && (
+        <Card className="mb-4">
+          <CardContent className="flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <p className="text-sm font-medium text-foreground">Connect your student profile</p>
+              <p className="text-xs text-muted-foreground">Pick your name once so your work is saved.</p>
+            </div>
+            <Button size="sm" className="gap-1.5" onClick={() => setClaimOpen(true)}>
+              <UserCheck className="h-4 w-4" /> Find my profile
+            </Button>
+          </CardContent>
+        </Card>
+      )}
+
+      <ClaimStudentRecordDialog
+        open={claimOpen}
+        onOpenChange={setClaimOpen}
+        onLinked={() => {
+          refreshStudent();
+        }}
       />
 
       {loading ? (
