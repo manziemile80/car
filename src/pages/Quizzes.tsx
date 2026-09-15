@@ -21,7 +21,8 @@ import {
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 import { useToast } from '@/hooks/use-toast';
-import { Plus, Trash2, ListChecks, Loader2, PenLine, BarChart3 } from 'lucide-react';
+import { Plus, Trash2, ListChecks, Loader2, PenLine, BarChart3, UserCheck } from 'lucide-react';
+import { ClaimStudentRecordDialog } from '@/components/students/ClaimStudentRecordDialog';
 
 interface Quiz {
   id: string;
@@ -62,8 +63,9 @@ const emptyQuestion = { question_text: '', option_a: '', option_b: '', option_c:
 export default function Quizzes() {
   const { role, user } = useAuth();
   const { toast } = useToast();
-  const { studentId } = useCurrentStudent();
+  const { studentId, refresh: refreshStudent } = useCurrentStudent();
   const isStaff = role === 'admin' || role === 'teacher';
+  const [claimOpen, setClaimOpen] = useState(false);
 
   const [quizzes, setQuizzes] = useState<Quiz[]>([]);
   const [subjects, setSubjects] = useState<{ id: string; name: string }[]>([]);
@@ -183,7 +185,20 @@ export default function Quizzes() {
   };
 
   const submitQuiz = async () => {
-    if (!takeQuiz || !studentId) return;
+    if (!takeQuiz) return;
+    if (!studentId) {
+      toast({
+        title: 'Connect your student profile first',
+        description: 'Pick your name so we can save your answers.',
+        variant: 'destructive',
+      });
+      setClaimOpen(true);
+      return;
+    }
+    if (takeQuestions.some((q) => !answers[q.id])) {
+      toast({ title: 'Answer every question before submitting', variant: 'destructive' });
+      return;
+    }
     let score = 0;
     let total = 0;
     takeQuestions.forEach((q) => {
@@ -235,6 +250,30 @@ export default function Quizzes() {
             </Button>
           ) : undefined
         }
+      />
+
+      {role === 'student' && !studentId && (
+        <Card className="mb-4">
+          <CardContent className="flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <p className="text-sm font-medium text-foreground">Connect your student profile</p>
+              <p className="text-xs text-muted-foreground">
+                Pick your name once so your quiz answers are saved.
+              </p>
+            </div>
+            <Button size="sm" className="gap-1.5" onClick={() => setClaimOpen(true)}>
+              <UserCheck className="h-4 w-4" /> Find my profile
+            </Button>
+          </CardContent>
+        </Card>
+      )}
+
+      <ClaimStudentRecordDialog
+        open={claimOpen}
+        onOpenChange={setClaimOpen}
+        onLinked={() => {
+          refreshStudent();
+        }}
       />
 
       {loading ? (
