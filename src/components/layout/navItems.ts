@@ -14,6 +14,7 @@ import {
   FolderOpen,
   NotebookPen,
   ListChecks,
+  Package,
 } from 'lucide-react';
 import { AppRole } from '@/types/database';
 
@@ -22,7 +23,7 @@ export interface NavItem {
   href: string;
   icon: React.ElementType;
   roles: AppRole[];
-  group: 'Overview' | 'School' | 'E-Learning' | 'Records' | 'Admin';
+  group: 'Overview' | 'School' | 'E-Learning' | 'Records' | 'Operations' | 'Admin';
 }
 
 export const navItems: NavItem[] = [
@@ -44,6 +45,8 @@ export const navItems: NavItem[] = [
   { label: 'Academic Reports', href: '/academic-reports', icon: FileText, roles: ['admin', 'teacher', 'parent', 'student'], group: 'Records' },
   { label: 'Reports', href: '/reports', icon: BarChart3, roles: ['admin', 'teacher', 'parent', 'viewer'], group: 'Records' },
 
+  { label: 'Stock Management', href: '/stock', icon: Package, roles: ['admin', 'stock_manager', 'teacher'], group: 'Operations' },
+
   { label: 'Users', href: '/users', icon: Users, roles: ['admin'], group: 'Admin' },
   { label: 'Settings', href: '/settings', icon: Settings, roles: ['admin'], group: 'Admin' },
 ];
@@ -53,5 +56,6 @@ export const roleBadges: Record<AppRole, { label: string; className: string }> =
   teacher: { label: 'Teacher', className: 'bg-secondary/20 text-secondary' },
   parent: { label: 'Parent', className: 'bg-primary/20 text-primary' },
   student: { label: 'Student', className: 'bg-info/20 text-info' },
+  stock_manager: { label: 'Stock Manager', className: 'bg-warning/20 text-warning' },
   viewer: { label: 'Viewer (read-only)', className: 'bg-muted text-muted-foreground' },
 };
