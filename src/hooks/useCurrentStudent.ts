@@ -16,7 +16,38 @@ export function useCurrentStudent() {
     }
     setLoading(true);
     const { data } = await supabase.from('students').select('id').eq('user_id', user.id).maybeSingle();
-    setStudentId(data?.id ?? null);
+    if (data?.id) {
+      setStudentId(data.id);
+      setLoading(false);
+      return;
+    }
+
+    // No linked record yet — create one from the signed-in user's profile so
+    // quiz answers and assignment submissions can always be saved.
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('full_name, email')
+      .eq('user_id', user.id)
+      .maybeSingle();
+
+    const fullName = (profile?.full_name || profile?.email || user.email || 'Student').trim();
+    const parts = fullName.split(/\s+/);
+    const firstName = parts[0] || 'Student';
+    const lastName = parts.slice(1).join(' ') || '-';
+
+    const { data: created } = await supabase
+      .from('students')
+      .insert({
+        first_name: firstName,
+        last_name: lastName,
+        student_id: `SELF-${user.id.slice(0, 8).toUpperCase()}`,
+        user_id: user.id,
+        enrollment_date: new Date().toISOString().slice(0, 10),
+      })
+      .select('id')
+      .maybeSingle();
+
+    setStudentId(created?.id ?? null);
     setLoading(false);
   }, [user, role]);
 
