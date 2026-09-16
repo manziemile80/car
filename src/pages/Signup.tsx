@@ -7,6 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Eye, EyeOff, Loader2 } from 'lucide-react';
 import schoolLogo from '@/assets/college-rebero-logo.png';
 import { toast } from 'sonner';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 export default function Signup() {
   const { user, loading: authLoading, signUp } = useAuth();
@@ -15,6 +16,7 @@ export default function Signup() {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [accountType, setAccountType] = useState<'student' | 'parent' | 'viewer'>('student');
   const [loading, setLoading] = useState(false);
 
   if (authLoading) {
@@ -44,13 +46,16 @@ export default function Signup() {
 
     setLoading(true);
 
-    const { error } = await signUp(email, password, fullName);
+    const { error } = await signUp(email, password, fullName, accountType);
 
     if (error) {
       toast.error('Signup failed', { description: error.message });
     } else {
       toast.success('Account created!', {
-        description: 'Please contact an administrator to assign you a role.',
+        description:
+          accountType === 'student'
+            ? 'Check your email to confirm, then sign in to take quizzes and assignments.'
+            : 'Check your email to confirm, then sign in.',
       });
     }
 
@@ -92,6 +97,23 @@ export default function Signup() {
                   required
                   className="h-11"
                 />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="accountType">I am a</Label>
+                <Select value={accountType} onValueChange={(v) => setAccountType(v as typeof accountType)}>
+                  <SelectTrigger id="accountType" className="h-11">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="student">Student</SelectItem>
+                    <SelectItem value="parent">Parent</SelectItem>
+                    <SelectItem value="viewer">Staff / other (view only)</SelectItem>
+                  </SelectContent>
+                </Select>
+                <p className="text-xs text-muted-foreground">
+                  Students get access to quizzes and assignments after signing in.
+                </p>
               </div>
 
               <div className="space-y-2">
