@@ -962,6 +962,89 @@ export type Database = {
           },
         ]
       }
+      stock_items: {
+        Row: {
+          category: string
+          created_at: string
+          created_by: string
+          id: string
+          location: string | null
+          min_quantity: number
+          name: string
+          notes: string | null
+          quantity: number
+          unit: string
+          updated_at: string
+        }
+        Insert: {
+          category?: string
+          created_at?: string
+          created_by: string
+          id?: string
+          location?: string | null
+          min_quantity?: number
+          name: string
+          notes?: string | null
+          quantity?: number
+          unit?: string
+          updated_at?: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          created_by?: string
+          id?: string
+          location?: string | null
+          min_quantity?: number
+          name?: string
+          notes?: string | null
+          quantity?: number
+          unit?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      stock_movements: {
+        Row: {
+          created_at: string
+          id: string
+          item_id: string
+          movement_date: string
+          movement_type: string
+          quantity: number
+          reason: string | null
+          recorded_by: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          item_id: string
+          movement_date?: string
+          movement_type: string
+          quantity: number
+          reason?: string | null
+          recorded_by: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          item_id?: string
+          movement_date?: string
+          movement_type?: string
+          quantity?: number
+          reason?: string | null
+          recorded_by?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "stock_movements_item_id_fkey"
+            columns: ["item_id"]
+            isOneToOne: false
+            referencedRelation: "stock_items"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       student_parents: {
         Row: {
           created_at: string
@@ -1123,6 +1206,7 @@ export type Database = {
       }
     }
     Functions: {
+      can_manage_stock: { Args: { _user_id: string }; Returns: boolean }
       get_current_student_id: { Args: { _user_id: string }; Returns: string }
       get_parent_student_ids: { Args: { _user_id: string }; Returns: string[] }
       get_student_cumulative_score: {
