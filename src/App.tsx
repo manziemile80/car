@@ -25,6 +25,7 @@ import Courses from "./pages/Courses";
 import Materials from "./pages/Materials";
 import Assignments from "./pages/Assignments";
 import Quizzes from "./pages/Quizzes";
+import Stock from "./pages/Stock";
 
 const queryClient = new QueryClient();
 
@@ -54,6 +55,7 @@ const App = () => (
             <Route path="/materials" element={<Materials />} />
             <Route path="/assignments" element={<Assignments />} />
             <Route path="/quizzes" element={<Quizzes />} />
+            <Route path="/stock" element={<Stock />} />
             <Route path="/users" element={<Users />} />
             <Route path="/settings" element={<Settings />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
