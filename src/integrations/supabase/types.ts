@@ -1155,7 +1155,13 @@ export type Database = {
       is_staff: { Args: { _user_id: string }; Returns: boolean }
     }
     Enums: {
-      app_role: "admin" | "teacher" | "parent" | "viewer" | "student"
+      app_role:
+        | "admin"
+        | "teacher"
+        | "parent"
+        | "viewer"
+        | "student"
+        | "stock_manager"
       attendance_status: "present" | "absent" | "late" | "excused"
       behavior_category:
         | "discipline"
@@ -1290,7 +1296,14 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      app_role: ["admin", "teacher", "parent", "viewer", "student"],
+      app_role: [
+        "admin",
+        "teacher",
+        "parent",
+        "viewer",
+        "student",
+        "stock_manager",
+      ],
       attendance_status: ["present", "absent", "late", "excused"],
       behavior_category: [
         "discipline",
