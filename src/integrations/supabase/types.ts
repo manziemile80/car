@@ -688,6 +688,56 @@ export type Database = {
         }
         Relationships: []
       }
+      purchase_orders: {
+        Row: {
+          created_at: string
+          created_by: string
+          expected_date: string | null
+          id: string
+          item_id: string
+          notes: string | null
+          quantity: number
+          status: string
+          supplier: string | null
+          unit_price: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          expected_date?: string | null
+          id?: string
+          item_id: string
+          notes?: string | null
+          quantity: number
+          status?: string
+          supplier?: string | null
+          unit_price?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          expected_date?: string | null
+          id?: string
+          item_id?: string
+          notes?: string | null
+          quantity?: number
+          status?: string
+          supplier?: string | null
+          unit_price?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "purchase_orders_item_id_fkey"
+            columns: ["item_id"]
+            isOneToOne: false
+            referencedRelation: "stock_items"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       quiz_attempts: {
         Row: {
           answers: Json
