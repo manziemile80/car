@@ -26,6 +26,7 @@ import Materials from "./pages/Materials";
 import Assignments from "./pages/Assignments";
 import Quizzes from "./pages/Quizzes";
 import Stock from "./pages/Stock";
+import StockDashboard from "./pages/StockDashboard";
 
 const queryClient = new QueryClient();
 
@@ -56,6 +57,7 @@ const App = () => (
             <Route path="/assignments" element={<Assignments />} />
             <Route path="/quizzes" element={<Quizzes />} />
             <Route path="/stock" element={<Stock />} />
+            <Route path="/stock-dashboard" element={<StockDashboard />} />
             <Route path="/users" element={<Users />} />
             <Route path="/settings" element={<Settings />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
