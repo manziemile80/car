@@ -30,6 +30,17 @@ interface UserWithRole extends Profile {
   role?: AppRole | null;
 }
 
+const roleDisplayNames: Record<AppRole, string> = {
+  admin: 'Administrator',
+  teacher: 'Teacher',
+  parent: 'Parent',
+  student: 'Student',
+  viewer: 'Viewer (read-only)',
+  stock_manager: 'Stock Manager',
+  director_of_studies: 'Director of Studies',
+  director_of_discipline: 'Director of Discipline',
+};
+
 export default function UsersPage() {
   const { role: currentRole, user: currentUser } = useAuth();
   const isAdmin = currentRole === 'admin';
@@ -146,6 +157,16 @@ export default function UsersPage() {
         return <ShieldCheck className="h-4 w-4" />;
       case 'parent':
         return <Shield className="h-4 w-4" />;
+      case 'student':
+        return <ShieldCheck className="h-4 w-4" />;
+      case 'viewer':
+        return <Shield className="h-4 w-4" />;
+      case 'stock_manager':
+        return <Shield className="h-4 w-4" />;
+      case 'director_of_studies':
+        return <ShieldCheck className="h-4 w-4" />;
+      case 'director_of_discipline':
+        return <ShieldAlert className="h-4 w-4" />;
       default:
         return null;
     }
@@ -159,6 +180,16 @@ export default function UsersPage() {
         return 'bg-secondary/15 text-secondary';
       case 'parent':
         return 'bg-primary/15 text-primary';
+      case 'student':
+        return 'bg-info/15 text-info';
+      case 'viewer':
+        return 'bg-muted text-muted-foreground';
+      case 'stock_manager':
+        return 'bg-warning/15 text-warning';
+      case 'director_of_studies':
+        return 'bg-indigo-500/15 text-indigo-400';
+      case 'director_of_discipline':
+        return 'bg-rose-500/15 text-rose-400';
       default:
         return 'bg-muted text-muted-foreground';
     }
@@ -227,7 +258,7 @@ export default function UsersPage() {
                         )}`}
                       >
                         {getRoleIcon(user.role)}
-                        {user.role ? user.role.charAt(0).toUpperCase() + user.role.slice(1) : 'No Role'}
+                        {user.role ? roleDisplayNames[user.role] : 'No Role'}
                       </span>
                     </td>
                     <td className="px-4 py-4 text-sm text-muted-foreground">
@@ -278,6 +309,8 @@ export default function UsersPage() {
                                 <SelectItem value="student">Student</SelectItem>
                                 <SelectItem value="stock_manager">Stock Manager</SelectItem>
                                 <SelectItem value="viewer">Viewer (read-only)</SelectItem>
+                                <SelectItem value="director_of_studies">Director of Studies</SelectItem>
+                                <SelectItem value="director_of_discipline">Director of Discipline</SelectItem>
                               </SelectContent>
                             </Select>
                             </div>

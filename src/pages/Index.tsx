@@ -51,7 +51,7 @@ const modules = [
   {
     icon: ShieldCheck,
     title: 'Role-Based Access',
-    desc: 'Admin, teacher, parent and read-only viewer permissions enforced end to end.',
+    desc: 'Admin, teacher, parent, student, stock manager, DOS, DOD and read-only viewer permissions are configured across the school system.',
     tone: 'text-success bg-success/10',
   },
 ];
