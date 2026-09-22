@@ -19,7 +19,7 @@ import {
 } from '@/components/ui/select';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
-import { Profile, AppRole } from '@/types/database';
+import { Profile, AppRole, ROLE_DISPLAY_NAMES, normalizeAppRole, APP_ROLE_VALUES } from '@/types/database';
 import { Users, Loader2, Shield, ShieldCheck, ShieldAlert, Trash2 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -30,16 +30,8 @@ interface UserWithRole extends Profile {
   role?: AppRole | null;
 }
 
-const roleDisplayNames: Record<AppRole, string> = {
-  admin: 'Administrator',
-  teacher: 'Teacher',
-  parent: 'Parent',
-  student: 'Student',
-  viewer: 'Viewer (read-only)',
-  stock_manager: 'Stock Manager',
-  director_of_studies: 'Director of Studies',
-  director_of_discipline: 'Director of Discipline',
-};
+const roleDisplayNames = ROLE_DISPLAY_NAMES;
+const allowedRoles = [...APP_ROLE_VALUES] as AppRole[];
 
 export default function UsersPage() {
   const { role: currentRole, user: currentUser } = useAuth();
@@ -63,22 +55,25 @@ export default function UsersPage() {
         .select('*')
         .order('created_at', { ascending: false });
 
-      if (profiles) {
-        const usersWithRoles: UserWithRole[] = [];
-        for (const profile of profiles) {
-          const { data: roleData } = await supabase
-            .from('user_roles')
-            .select('role')
-            .eq('user_id', profile.user_id)
-            .single();
-
-          usersWithRoles.push({
-            ...(profile as Profile),
-            role: roleData?.role as AppRole | null,
-          });
-        }
-        setUsers(usersWithRoles);
+      if (!profiles) {
+        setUsers([]);
+        return;
       }
+
+      const usersWithRoles: UserWithRole[] = [];
+      for (const profile of profiles) {
+        const { data: roleData } = await supabase
+          .from('user_roles')
+          .select('role')
+          .eq('user_id', profile.user_id)
+          .maybeSingle();
+
+        usersWithRoles.push({
+          ...(profile as Profile),
+          role: normalizeAppRole(roleData?.role, 'viewer'),
+        });
+      }
+      setUsers(usersWithRoles);
     } catch (error) {
       console.error('Error fetching users:', error);
       toast.error('Failed to load users');
@@ -89,37 +84,49 @@ export default function UsersPage() {
 
   const handleAssignRole = async () => {
     if (!selectedUser) return;
+
+    const trimmedName = editName.trim();
+    if (!trimmedName) {
+      toast.error('Full name is required before saving.');
+      return;
+    }
+
+    const safeRole = normalizeAppRole(newRole, 'viewer');
+    if (safeRole !== newRole) {
+      toast.error('Invalid role selected. Please choose a valid user role.');
+      return;
+    }
+
     setFormLoading(true);
 
     try {
-      // Update profile name
-      if (editName && editName !== selectedUser.full_name) {
+      if (trimmedName !== selectedUser.full_name) {
         const { error: pErr } = await supabase
           .from('profiles')
-          .update({ full_name: editName })
+          .update({ full_name: trimmedName })
           .eq('user_id', selectedUser.user_id);
         if (pErr) throw pErr;
       }
-      // Check if user already has a role
-      const { data: existingRole } = await supabase
+
+      const { data: existingRoleRows, error: lookupError } = await supabase
         .from('user_roles')
         .select('id')
         .eq('user_id', selectedUser.user_id)
-        .single();
+        .limit(1);
 
-      if (existingRole) {
-        // Update existing role
+      if (lookupError) throw lookupError;
+
+      if (existingRoleRows && existingRoleRows.length > 0) {
         const { error } = await supabase
           .from('user_roles')
-          .update({ role: newRole })
+          .update({ role: safeRole })
           .eq('user_id', selectedUser.user_id);
 
         if (error) throw error;
       } else {
-        // Insert new role
         const { error } = await supabase
           .from('user_roles')
-          .insert({ user_id: selectedUser.user_id, role: newRole });
+          .insert({ user_id: selectedUser.user_id, role: safeRole });
 
         if (error) throw error;
       }
@@ -127,7 +134,7 @@ export default function UsersPage() {
       toast.success('User updated successfully');
       setIsAssignDialogOpen(false);
       setSelectedUser(null);
-      fetchUsers();
+      await fetchUsers();
     } catch (error: any) {
       toast.error('Failed to update user', { description: error.message });
     } finally {
@@ -298,19 +305,16 @@ export default function UsersPage() {
                             </div>
                             <div className="space-y-2">
                               <Label>Role</Label>
-                            <Select value={newRole} onValueChange={(v) => setNewRole(v as AppRole)}>
+                            <Select value={newRole} onValueChange={(v) => setNewRole(normalizeAppRole(v, 'viewer'))}>
                               <SelectTrigger>
                                 <SelectValue />
                               </SelectTrigger>
                               <SelectContent>
-                                <SelectItem value="admin">Administrator</SelectItem>
-                                <SelectItem value="teacher">Teacher</SelectItem>
-                                <SelectItem value="parent">Parent</SelectItem>
-                                <SelectItem value="student">Student</SelectItem>
-                                <SelectItem value="stock_manager">Stock Manager</SelectItem>
-                                <SelectItem value="viewer">Viewer (read-only)</SelectItem>
-                                <SelectItem value="director_of_studies">Director of Studies</SelectItem>
-                                <SelectItem value="director_of_discipline">Director of Discipline</SelectItem>
+                                {allowedRoles.map((role) => (
+                                  <SelectItem key={role} value={role}>
+                                    {roleDisplayNames[role]}
+                                  </SelectItem>
+                                ))}
                               </SelectContent>
                             </Select>
                             </div>

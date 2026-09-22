@@ -1,14 +1,36 @@
 // Custom types for the Conduct app
 
-export type AppRole =
-  | 'admin'
-  | 'teacher'
-  | 'parent'
-  | 'student'
-  | 'viewer'
-  | 'stock_manager'
-  | 'director_of_studies'
-  | 'director_of_discipline';
+export const APP_ROLE_VALUES = [
+  'admin',
+  'teacher',
+  'parent',
+  'student',
+  'viewer',
+  'stock_manager',
+  'director_of_studies',
+  'director_of_discipline',
+] as const;
+
+export type AppRole = (typeof APP_ROLE_VALUES)[number];
+
+export const ROLE_DISPLAY_NAMES: Record<AppRole, string> = {
+  admin: 'Administrator',
+  teacher: 'Teacher',
+  parent: 'Parent',
+  student: 'Student',
+  viewer: 'Viewer (read-only)',
+  stock_manager: 'Stock Manager',
+  director_of_studies: 'Director of Studies',
+  director_of_discipline: 'Director of Discipline',
+};
+
+export function isValidAppRole(value: unknown): value is AppRole {
+  return typeof value === 'string' && APP_ROLE_VALUES.includes(value as AppRole);
+}
+
+export function normalizeAppRole(value: unknown, fallback: AppRole = 'viewer'): AppRole {
+  return isValidAppRole(value) ? value : fallback;
+}
 
 export type BehaviorCategory = 'discipline' | 'respect' | 'attendance' | 'participation';
 

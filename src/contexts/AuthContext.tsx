@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
-import { AppRole, Profile } from '@/types/database';
+import { AppRole, Profile, normalizeAppRole } from '@/types/database';
 
 interface AuthContextType {
   user: User | null;
@@ -64,7 +64,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         .from('profiles')
         .select('*')
         .eq('user_id', userId)
-        .single();
+        .maybeSingle();
 
       if (profileData) {
         setProfile(profileData as Profile);
@@ -75,13 +75,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         .from('user_roles')
         .select('role')
         .eq('user_id', userId)
-        .single();
+        .maybeSingle();
 
       if (roleData) {
-        setRole(roleData.role as AppRole);
+        setRole(normalizeAppRole(roleData.role, 'viewer'));
+      } else {
+        setRole('viewer');
       }
     } catch (error) {
       console.error('Error fetching user data:', error);
+      setRole('viewer');
     } finally {
       setLoading(false);
     }
